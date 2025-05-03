@@ -1,0 +1,29 @@
+# Written by MakeHuman 1.2.1 alpha
+version v1.2.1
+camera 357.5 359.5 -0.07381778990820122 0.8750244386849892 0.17371489809344973 5.612499999999998
+modifier head/head-age-decr|incr -0.282000
+modifier breast/BreastSize 0.500000
+modifier breast/BreastFirmness 0.500000
+modifier macrodetails/Gender 0.832000
+modifier macrodetails/Age 0.611000
+modifier macrodetails/African 0.108000
+modifier macrodetails/Asian 0.784000
+modifier macrodetails/Caucasian 0.108000
+modifier macrodetails-universal/Muscle 0.192000
+modifier macrodetails-universal/Weight 0.539000
+modifier macrodetails-height/Height 0.186000
+modifier macrodetails-proportions/BodyProportions 0.545000
+teeth Teeth_Base 0a5ec82a-0d5f-43ce-a765-8f076f95692d
+proxy male_muscle_13290 79e967dc-3f7a-4f2d-851e-4f06753ed571
+hair short01 766436e9-63ed-4f6a-afa9-99f3acff70a8
+skeleton default.mhskel
+eyebrows eyebrow009 55b3b52a-379e-426d-b320-562ed57202b3
+eyes HighPolyEyes 2c12f43b-1303-432c-b7ce-d78346baf2e6
+clothesHideFaces True
+expression determination02.mhpose
+skinMaterial skins/old_asian_male/old_asian_male.mhmat
+material short01 766436e9-63ed-4f6a-afa9-99f3acff70a8 short01.mhmat
+material HighPolyEyes 2c12f43b-1303-432c-b7ce-d78346baf2e6 eyes/materials/brown.mhmat
+material eyebrow009 55b3b52a-379e-426d-b320-562ed57202b3 eyebrow009.mhmat
+material Teeth_Base 0a5ec82a-0d5f-43ce-a765-8f076f95692d teeth/materials/teeth.mhmat
+subdivide False
