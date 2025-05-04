@@ -1,0 +1,82 @@
+# Blender 4.3.2 MTL File: 'BatallaMongol_EscenaCompleta.blend'
+# www.blender.org
+
+newmtl CaballoPropio
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/morbius/Documents/GitHub/Proyecto_Modelos_CGIHM/Texturas/Caballo.jpg
+
+newmtl Caballo_Cafe
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/texture_0.png
+
+newmtl Material
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/CG/G5/bin/textures/madera2.png
+
+newmtl Material.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/morbius/Documents/GitHub/Proyecto_Modelos_CGIHM/Salas/textures/texture_0.png
+
+newmtl Material.002
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl Material.003
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd C:/texture_0.png
+
+newmtl Silla
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.074214 0.035602 0.016807
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Terreno
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.022936 0.022936 0.022936
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/morbius/Documents/GitHub/Proyecto_Modelos_CGIHM/Texturas/aerial_grass_rock_diff_1k.jpg
