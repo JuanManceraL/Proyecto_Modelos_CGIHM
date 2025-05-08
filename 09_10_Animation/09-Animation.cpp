@@ -367,9 +367,9 @@ bool Update() {
 	}
 
 
-// *************** MODELOS ESTATICOS *********************************
-// ESCENA JINETES
-	// terreno
+	// *************** MODELOS ESTATICOS *********************************
+	// ESCENA JINETES
+		// terreno
 	{
 		mLightsShader->use();
 
@@ -454,7 +454,7 @@ bool Update() {
 	}
 
 	//llanuras irregulares
- {
+	{
 		mLightsShader->use();
 
 		// Activamos para objetos transparentes
@@ -497,8 +497,8 @@ bool Update() {
 
 
 
-// ************************* MODELOS DINAMICOS *****************************************
-	// Objeto animado -- GUERRERO arco
+	// ************************* MODELOS DINAMICOS *****************************************
+		// Objeto animado -- GUERRERO arco
 
 	{
 		character01->UpdateAnimation(deltaTime);
@@ -595,7 +595,7 @@ bool Update() {
 
 	// GUERRERO solo
 
- {
+	{
 		character04->UpdateAnimation(deltaTime);
 
 		// Activación del shader del personaje
@@ -638,7 +638,7 @@ bool Update() {
 		// Aplicamos transformaciones del modelo
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::vec3 position1(0.0f, 0.0f, 0.0f);
-		model = glm::translate(model,position1); // translate it down so it's at the center of the scene
+		model = glm::translate(model, position1); // translate it down so it's at the center of the scene
 		model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
 
