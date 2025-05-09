@@ -291,8 +291,8 @@ bool Start() {
 	// Lights configuration
 
 	Light light01;
-	light01.Position = glm::vec3(0.0f, 2.0f, 0.0f);
-	light01.Color = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+	light01.Position = glm::vec3(0.0f, 9.0f, 0.0f);
+	light01.Color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 	gLights.push_back(light01);
 
 	return true;
@@ -426,7 +426,7 @@ bool Update() {
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, floorOffsetZ)); // ¡Nuevo desplazamiento!
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		mLightsShader->setMat4("model", model);
 
 		// Configuramos propiedades de fuentes de luz
@@ -655,7 +655,7 @@ bool Update() {
 	glUseProgram(0);
 
 	{
-		caballo01->UpdateAnimation(deltaTime);
+		//caballo01->UpdateAnimation(deltaTime);
 
 		// Activación del shader del personaje
 		dynamicShader->use();
@@ -684,7 +684,7 @@ bool Update() {
 	glUseProgram(0);
 
 	{
-		caballo01->UpdateAnimation(deltaTime);
+		//caballo01->UpdateAnimation(deltaTime);
 
 		// Activación del shader del personaje
 		dynamicShader->use();
@@ -714,7 +714,7 @@ bool Update() {
 
 
 	{
-		caballo01->UpdateAnimation(deltaTime);
+		//caballo01->UpdateAnimation(deltaTime);
 
 		// Activación del shader del personaje
 		dynamicShader->use();
