@@ -24,8 +24,6 @@ using namespace std;
 
 #include <glm/gtx/string_cast.hpp>
 
-unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
-
 struct BoneInfo
 {
 	aiMatrix4x4 BoneOffset;
@@ -88,7 +86,7 @@ struct Bone {
 
 };
 
-unsigned int TextureFromFile(const char *path, const string &directory, bool gamma)
+inline unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false)
 {
     string filename = string(path);
     filename = directory + '/' + filename;
