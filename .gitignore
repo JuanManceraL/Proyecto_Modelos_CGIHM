@@ -1,0 +1,7 @@
+*.vsidx
+*.db
+*.db-shm
+*.db-wall
+*.opendb
+*ipch
+/09_10_Animation/Proyecto/Animacion/.vs/Animacion
