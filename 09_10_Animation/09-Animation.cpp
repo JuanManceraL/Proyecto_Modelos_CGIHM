@@ -31,6 +31,7 @@
 
 #include <irrKlang.h>
 using namespace irrklang;
+#include "ChessGame.h"
 
 float floorOffsetZ = 0.0f; // Variable para el desplazamiento del piso
 float floorSpeed = 1.0f;   // Velocidad del movimiento (ajústala según necesites)
@@ -44,6 +45,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
+void RenderChess(Shader* shader, glm::mat4 model);
+glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat4 view, float planeY);
+void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
 // Gobals
 GLFWwindow* window;
@@ -130,6 +134,11 @@ ISoundEngine* SoundEngine = createIrrKlangDevice();
 
 // selección de cámara
 bool    activeCamera = 1; // activamos la primera cámara
+//********************************Variables globales para inicializar el juego y obtener posiciones********************************
+ChessGame chessGame;
+glm::vec3 posMouse(0.0f);
+double xpos, ypos;
+//*********************************************************************************************************************************
 
 // Entrada a función principal
 int main()
@@ -230,6 +239,7 @@ bool Start() {
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetMouseButtonCallback(window, MouseButtonCallback);
 
 	// Ocultar el cursor mientras se rota la escena
 	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -492,7 +502,6 @@ bool Update() {
 
 		llanura_irregular->Draw(*mLightsShader);
 		model = glm::mat4(1.0f);
-
 	}
 
 
@@ -866,3 +875,91 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll((float)yoffset);
 }
+//*****************************************Definición de la función para renderizar piezas*****************************************
+void RenderChess(Shader* shader, glm::mat4 model) {
+	model = glm::mat4(1.0f);
+	shader->setMat4("model", model);
+	chessGame.Tablero->Draw(*shader);
+
+	for (Character& current : chessGame.whites) {
+		if (current.alive) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, *current.position);
+			shader->setMat4("model", model);
+			current.model->Draw(*shader);
+		}
+	}
+	for (Character& current : chessGame.blacks) {
+		if (current.alive) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, *current.position);
+			shader->setMat4("model", model);
+			current.model->Draw(*shader);
+		}
+	}
+}
+//*****************************************************************************************************************************
+
+
+//*****************************************************************************************************************************
+//Función para convertir coordenadas del mouse a coordenadas del mundo relacionadas a las casillas del tablero (plano Y=0.2)
+glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat4 view, float planeY = 0.2f) {
+	// Convertir coordenadas del mouse a NDC
+	double x = (2.0f * xpos) / SCR_WIDTH - 1.0f;
+	double y = 1.0f - (2.0f * ypos) / SCR_HEIGHT;
+
+	// Crear vector en espacio de clip
+	glm::vec4 rayClip = glm::vec4(x, y, -1.0f, 1.0f);
+
+	// Convertir a espacio de ojos (eye space)
+	glm::mat4 invProjection = glm::inverse(projection);
+	glm::vec4 rayEye = invProjection * rayClip;
+	rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+
+	// Convertir a espacio del mundo
+	glm::mat4 invView = glm::inverse(view);
+	glm::vec4 rayWorld = invView * rayEye;
+	glm::vec3 rayDir = glm::normalize(glm::vec3(rayWorld));
+
+	// Calcular intersección con el plano Y = planeY
+	float t = (planeY - camera.Position[1]) / rayDir.y;
+	glm::vec3 worldPos = camera.Position + t * rayDir;
+
+	float cellSize = 0.6f; // Distancia entre casillas
+	float boardOriginX = -2.1f; // Origen del tablero en X
+	float boardOriginZ = -2.1f; // Origen del tablero en Z
+	int boardSize = 8;          // Tamaño 8x8 casillas
+
+	// Calcular casilla
+	float relativeX = (worldPos.x - boardOriginX) / cellSize;
+	float relativeZ = (worldPos.z - boardOriginZ) / cellSize;
+
+	int cellX = static_cast<int>(round(relativeX));
+	int cellZ = static_cast<int>(round(relativeZ));
+
+	// Verificar si está dentro del tablero
+	if (cellX < 0 || cellX >= boardSize || cellZ < 0 || cellZ >= boardSize) {
+		// Fuera del tablero
+		return glm::vec3(9999.0f);
+	}
+
+	// Calcular posición centrada
+	float snappedX = boardOriginX + cellX * cellSize;
+	float snappedZ = boardOriginZ + cellZ * cellSize;
+
+	return glm::vec3(snappedX, planeY, snappedZ);
+}
+//*****************************************************************************************************************************
+
+//****************************************Funcion para manejar agarrar y soltar piezas****************************************
+void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		std::cout << "(" << posMouse.x << "," << posMouse.y << "," << posMouse.z << ")" << std::endl;
+		chessGame.HandleMouseClick(posMouse);
+	}
+	else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+		chessGame.HandleRightClick();
+	}
+}
+
+//*****************************************************************************************************************************

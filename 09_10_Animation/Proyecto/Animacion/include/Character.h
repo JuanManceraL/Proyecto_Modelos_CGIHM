@@ -20,6 +20,7 @@
 *           6 --> Peon
 */
 struct Character {
+    Model* model;
     std::string name;
     glm::vec3* position;
     unsigned int team;
