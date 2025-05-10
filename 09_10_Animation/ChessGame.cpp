@@ -2,7 +2,7 @@
 #include <iostream>
 
 ChessGame::ChessGame() : pick_place(true) {
-    // Inicializar posiciones de las piezas
+    // Inicialización de las variables miembro en el constructor
     reyBlancoPos = glm::vec3(-0.3f, 0.2f, -2.1f);
     torre1BlancoPos = glm::vec3(2.1f, 0.2f, -2.1f);
     alfil1BlancoPos = glm::vec3(0.9f, 0.2f, -2.1f);
@@ -86,135 +86,31 @@ void ChessGame::LoadModels() {
 
 void ChessGame::InitPieces() {
     // Inicializar piezas blancas
-    whites.push_back({ "Torre Blanca 2", &torre2BlancoPos, whitesTeam, Torre, 1 });
-    whites.push_back({ "Caballo Blanco 2", &caballo2BlancoPos, whitesTeam, Caballo, 1 });
-    whites.push_back({ "Alfil Blanco 2", &alfil2BlancoPos, whitesTeam, Alfil, 1 });
-    whites.push_back({ "Rey Blanco", &reyBlancoPos, whitesTeam, Rey, 1 });
-    whites.push_back({ "Reyna Blanca", &reynaBlancoPos, whitesTeam, Reyna, 1 });
-    whites.push_back({ "Alfil Blanco", &alfil1BlancoPos, whitesTeam, Alfil, 1 });
-    whites.push_back({ "Caballo Blanco", &caballo1BlancoPos, whitesTeam, Caballo, 1 });
-    whites.push_back({ "Torre Blanca", &torre1BlancoPos, whitesTeam, Torre, 1 });
+    whites.push_back({ TorreBlanca, "Torre Blanca 2", &torre2BlancoPos, whitesTeam, Torre, 1 });
+    whites.push_back({ CaballoBlanco, "Caballo Blanco 2", &caballo2BlancoPos, whitesTeam, Caballo, 1 });
+    whites.push_back({ AlfilBlanco, "Alfil Blanco 2", &alfil2BlancoPos, whitesTeam, Alfil, 1 });
+    whites.push_back({ ReyBlanco , "Rey Blanco", &reyBlancoPos, whitesTeam, Rey, 1 });
+    whites.push_back({ ReynaBlanca, "Reyna Blanca", &reynaBlancoPos, whitesTeam, Reyna, 1 });
+    whites.push_back({ AlfilBlanco, "Alfil Blanco", &alfil1BlancoPos, whitesTeam, Alfil, 1 });
+    whites.push_back({ CaballoBlanco, "Caballo Blanco", &caballo1BlancoPos, whitesTeam, Caballo, 1 });
+    whites.push_back({ TorreBlanca , "Torre Blanca", &torre1BlancoPos, whitesTeam, Torre, 1 });
 
     for (int i = 0; i < peonesBlancoPos.size(); ++i) {
-        whites.push_back({ "Peon Blanco " + std::to_string(i), &peonesBlancoPos[i], whitesTeam, Peon, 1 });
+        whites.push_back({ PeonBlanco, "Peon Blanco " + std::to_string(i), &peonesBlancoPos[i], whitesTeam, Peon, 1 });
     }
 
     // Inicializar piezas negras
-    blacks.push_back({ "Torre Negra", &torre1NegroPos, blacksTeam, Torre, 1 });
-    blacks.push_back({ "Caballo Negro", &caballo1NegroPos, blacksTeam, Caballo, 1 });
-    blacks.push_back({ "Alfil Negro", &alfil1NegroPos, blacksTeam, Alfil, 1 });
-    blacks.push_back({ "Rey Negro", &reyNegroPos, blacksTeam, Rey, 1 });
-    blacks.push_back({ "Reyna Negra", &reynaNegroPos, blacksTeam, Reyna, 1 });
-    blacks.push_back({ "Alfil Negro 2", &alfil2NegroPos, blacksTeam, Alfil, 1 });
-    blacks.push_back({ "Caballo Negro 2", &caballo2NegroPos, blacksTeam, Caballo, 1 });
-    blacks.push_back({ "Torre Negra 2", &torre2NegroPos, blacksTeam, Torre, 1 });
+    blacks.push_back({TorreNegra, "Torre Negra", &torre1NegroPos, blacksTeam, Torre, 1 });
+    blacks.push_back({ CaballoNegro, "Caballo Negro", &caballo1NegroPos, blacksTeam, Caballo, 1 });
+    blacks.push_back({ AlfilNegro, "Alfil Negro", &alfil1NegroPos, blacksTeam, Alfil, 1 });
+    blacks.push_back({ ReyNegro, "Rey Negro", &reyNegroPos, blacksTeam, Rey, 1 });
+    blacks.push_back({ ReynaNegra, "Reyna Negra", &reynaNegroPos, blacksTeam, Reyna, 1 });
+    blacks.push_back({ AlfilNegro, "Alfil Negro 2", &alfil2NegroPos, blacksTeam, Alfil, 1 });
+    blacks.push_back({ CaballoNegro, "Caballo Negro 2", &caballo2NegroPos, blacksTeam, Caballo, 1 });
+    blacks.push_back({ TorreNegra , "Torre Negra 2", &torre2NegroPos, blacksTeam, Torre, 1 });
 
     for (int i = peonesNegroPos.size() - 1; i >= 0; --i) {
-        blacks.push_back({ "Peon Negro " + std::to_string(i), &peonesNegroPos[i], blacksTeam, Peon, 1 });
-    }
-}
-
-void ChessGame::Render(Shader* shader) {
-    glm::mat4 model = glm::mat4(1.0f);
-    shader->setMat4("model", model);
-    Tablero->Draw(*shader);
-
-    // Dibujar piezas blancas
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, reyBlancoPos);
-    shader->setMat4("model", model);
-    ReyBlanco->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, torre1BlancoPos);
-    shader->setMat4("model", model);
-    TorreBlanca->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, torre2BlancoPos);
-    shader->setMat4("model", model);
-    TorreBlanca->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, alfil1BlancoPos);
-    shader->setMat4("model", model);
-    AlfilBlanco->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, alfil2BlancoPos);
-    shader->setMat4("model", model);
-    AlfilBlanco->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, caballo1BlancoPos);
-    shader->setMat4("model", model);
-    CaballoBlanco->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, caballo2BlancoPos);
-    shader->setMat4("model", model);
-    CaballoBlanco->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, reynaBlancoPos);
-    shader->setMat4("model", model);
-    ReynaBlanca->Draw(*shader);
-
-    // Dibujar peones blancos
-    for (const auto& pos : peonesBlancoPos) {
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, pos);
-        shader->setMat4("model", model);
-        PeonBlanco->Draw(*shader);
-    }
-
-    // Dibujar piezas negras
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, reyNegroPos);
-    shader->setMat4("model", model);
-    ReyNegro->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, torre1NegroPos);
-    shader->setMat4("model", model);
-    TorreNegra->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, torre2NegroPos);
-    shader->setMat4("model", model);
-    TorreNegra->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, alfil1NegroPos);
-    shader->setMat4("model", model);
-    AlfilNegro->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, alfil2NegroPos);
-    shader->setMat4("model", model);
-    AlfilNegro->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, caballo1NegroPos);
-    shader->setMat4("model", model);
-    CaballoNegro->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, caballo2NegroPos);
-    shader->setMat4("model", model);
-    CaballoNegro->Draw(*shader);
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, reynaNegroPos);
-    shader->setMat4("model", model);
-    ReynaNegra->Draw(*shader);
-
-    // Dibujar peones negros
-    for (const auto& pos : peonesNegroPos) {
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, pos);
-        shader->setMat4("model", model);
-        PeonNegro->Draw(*shader);
+        blacks.push_back({ PeonNegro, "Peon Negro " + std::to_string(i), &peonesNegroPos[i], blacksTeam, Peon, 1 });
     }
 }
 
@@ -238,6 +134,8 @@ void ChessGame::HandleMouseClick(const glm::vec3& posMouse) {
         CheckGameStatus();
     }
 }
+
+
 
 void ChessGame::HandleRightClick() {
     if (!pick_place) {
@@ -269,3 +167,120 @@ const std::vector<Character>& ChessGame::GetWhites() const {
 const std::vector<Character>& ChessGame::GetBlacks() const {
     return blacks;
 }
+
+/*
+Para poder renderizar en el main se bene poner
+ *****************************************Prototiposde funciones para el juego*****************************************
+void RenderChess(Shader* shader, glm::mat4 model);
+glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat4 view, float planeY);
+void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+***********************************************************************************************************************
+
+
+********************************Variables globales para inicializar el juego y obtener posiciones********************************
+ChessGame chessGame;
+glm::vec3 posMouse(0.0f);
+double xpos, ypos;
+*********************************************************************************************************************************
+
+
+********************************************************Dentro de Start()********************************************************
+    glfwSetMouseButtonCallback(window, MouseButtonCallback);
+*********************************************************************************************************************************
+
+
+*****************************************Dentro del bucle de renderizado*****************************************
+RenderChess(mLightsShader, model);
+*****************************************************************************************************************
+
+
+*****************************************Definición de la función para renderizar piezas*****************************************
+void RenderChess(Shader* shader, glm::mat4 model) {
+    model = glm::mat4(1.0f);
+    shader->setMat4("model", model);
+    chessGame.Tablero->Draw(*shader);
+
+    for (Character& current : chessGame.whites) {
+        if (current.alive) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, *current.position);
+            shader->setMat4("model", model);
+            current.model->Draw(*shader);
+        }
+    }
+    for (Character& current : chessGame.blacks) {
+        if (current.alive) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, *current.position);
+            shader->setMat4("model", model);
+            current.model->Draw(*shader);
+        }
+    }
+}
+*****************************************************************************************************************************
+
+
+*****************************************************************************************************************************
+Función para convertir coordenadas del mouse a coordenadas del mundo relacionadas a las casillas del tablero (plano Y=0.2)
+glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat4 view, float planeY = 0.2f) {
+    // Convertir coordenadas del mouse a NDC
+    double x = (2.0f * xpos) / SCR_WIDTH - 1.0f;
+    double y = 1.0f - (2.0f * ypos) /SCR_HEIGHT;
+
+    // Crear vector en espacio de clip
+    glm::vec4 rayClip = glm::vec4(x, y, -1.0f, 1.0f);
+
+    // Convertir a espacio de ojos (eye space)
+    glm::mat4 invProjection = glm::inverse(projection);
+    glm::vec4 rayEye = invProjection * rayClip;
+    rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+
+    // Convertir a espacio del mundo
+    glm::mat4 invView = glm::inverse(view);
+    glm::vec4 rayWorld = invView * rayEye;
+    glm::vec3 rayDir = glm::normalize(glm::vec3(rayWorld));
+
+    // Calcular intersección con el plano Y = planeY
+    float t = (planeY - camera.Position[1]) / rayDir.y;
+    glm::vec3 worldPos = camera.Position + t * rayDir;
+
+    float cellSize = 0.6f; // Distancia entre casillas
+    float boardOriginX = -2.1f; // Origen del tablero en X
+    float boardOriginZ = -2.1f; // Origen del tablero en Z
+    int boardSize = 8;          // Tamaño 8x8 casillas
+
+    // Calcular casilla
+    float relativeX = (worldPos.x - boardOriginX) / cellSize;
+    float relativeZ = (worldPos.z - boardOriginZ) / cellSize;
+
+    int cellX = static_cast<int>(round(relativeX));
+    int cellZ = static_cast<int>(round(relativeZ));
+
+    // Verificar si está dentro del tablero
+    if (cellX < 0 || cellX >= boardSize || cellZ < 0 || cellZ >= boardSize) {
+        // Fuera del tablero
+        return glm::vec3(9999.0f);
+    }
+
+    // Calcular posición centrada
+    float snappedX = boardOriginX + cellX * cellSize;
+    float snappedZ = boardOriginZ + cellZ * cellSize;
+
+    return glm::vec3(snappedX, planeY, snappedZ);
+}
+*****************************************************************************************************************************
+
+****************************************Funcion para manejar agarrar y soltar piezas****************************************
+void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        std::cout << "(" << posMouse.x << "," << posMouse.y << "," << posMouse.z << ")" << std::endl;
+        chessGame.HandleMouseClick(posMouse);
+    }
+    else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+        chessGame.HandleRightClick();
+    }
+}
+
+*****************************************************************************************************************************
+
+*/
