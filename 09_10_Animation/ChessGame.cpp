@@ -170,6 +170,10 @@ const std::vector<Character>& ChessGame::GetBlacks() const {
 
 /*
 Para poder renderizar en el main se bene poner
+*********************************incluir la cabecera*********************************
+#include "ChessGame.h"
+*************************************************************************************
+
  *****************************************Prototiposde funciones para el juego*****************************************
 void RenderChess(Shader* shader, glm::mat4 model);
 glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat4 view, float planeY);

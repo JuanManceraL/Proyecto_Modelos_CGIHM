@@ -6,7 +6,7 @@
       "AbsoluteMoniker": "D:0:0:{25DA9E19-1D44-4EA1-9EC4-B05673E97879}|Animacion.vcxproj|O:\\Documentos\\Octavo\\Proyecto_Modelos_CGIHM\\09_10_Animation\\09-Animation.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\morbius\\Documents\\GitHub\\Proyecto_Modelos_CGIHM\\09_10_Animation\\09-Animation.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|O:\\Documentos\\Octavo\\Proyecto_Modelos_CGIHM\\09_10_Animation\\ChessGame.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -16,8 +16,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ChessGame.cpp",
+              "DocumentMoniker": "O:\\Documentos\\Octavo\\Proyecto_Modelos_CGIHM\\09_10_Animation\\ChessGame.cpp",
+              "RelativeDocumentMoniker": "..\\..\\ChessGame.cpp",
+              "ToolTip": "O:\\Documentos\\Octavo\\Proyecto_Modelos_CGIHM\\09_10_Animation\\ChessGame.cpp",
+              "RelativeToolTip": "..\\..\\ChessGame.cpp",
+              "ViewState": "AgIAAKUAAAAAAAAAAAAAAK4AAABVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-10T05:08:06.699Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -26,19 +39,10 @@
               "RelativeDocumentMoniker": "..\\..\\09-Animation.cpp",
               "ToolTip": "O:\\Documentos\\Octavo\\Proyecto_Modelos_CGIHM\\09_10_Animation\\09-Animation.cpp",
               "RelativeToolTip": "..\\..\\09-Animation.cpp",
-              "ViewState": "AgIAAOkBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAB0AAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-05-09T05:12:08.198Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "09-Animation.cpp",
-              "DocumentMoniker": "C:\\Users\\morbius\\Documents\\GitHub\\Proyecto_Modelos_CGIHM\\09_10_Animation\\09-Animation.cpp",
-              "ToolTip": "C:\\Users\\morbius\\Documents\\GitHub\\Proyecto_Modelos_CGIHM\\09_10_Animation\\09-Animation.cpp",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-05-08T07:18:05.112Z"
             }
           ]
         }
