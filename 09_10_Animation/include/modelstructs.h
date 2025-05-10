@@ -42,6 +42,8 @@ struct VertexBoneData
 	float Weights[2*MAX_NUM_BONES];
 	int numBones;
 
+	unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false);
+
 	VertexBoneData()
 	{
 		Reset();
@@ -86,8 +88,7 @@ struct Bone {
 
 };
 
-inline unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false)
-{
+unsigned int TextureFromFile(const char* path, const string& directory, bool gamma) {
     string filename = string(path);
     filename = directory + '/' + filename;
 
