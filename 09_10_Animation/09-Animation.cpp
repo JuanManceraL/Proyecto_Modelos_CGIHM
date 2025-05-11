@@ -57,7 +57,7 @@ const unsigned int SCR_WIDTH = 1024;
 const unsigned int SCR_HEIGHT = 768;
 
 // Definición de cámara (posición en XYZ)
-Camera camera(glm::vec3(0.0f, 2.0f, 10.0f));
+Camera camera(glm::vec3(3.0f, 2.0f, -3.0f));
 Camera camera3rd(glm::vec3(0.0f, 0.0f, 0.0f));
 
 // Controladores para el movimiento del mouse
@@ -92,6 +92,7 @@ Model* terrenos;
 Model* monte;
 Model* llanura_irregular;
 Model* templos;
+Model* salaInicial;
 
 
 Model* gridMesh;
@@ -130,7 +131,8 @@ float proceduralTime = 0.0f;
 float wavesTime = 0.0f;
 
 //Salas
-int salaActual = 0;
+int salaActual = 1;
+int salaAntFrame = 1;
 
 // Audio
 ISoundEngine* SoundEngine = createIrrKlangDevice();
@@ -283,6 +285,7 @@ bool Start() {
 	character03 = new AnimatedModel("models/mongol/jinete_tug.fbx");
 	character04 = new AnimatedModel("models/mongol/jinete_solo.fbx");
 	caballo01 = new AnimatedModel("models/mongol/caballo1.fbx");
+	salaInicial = new Model("models/SalaInicial/SalaInicial.obj");
 
 	// Cubemap
 	vector<std::string> faces
@@ -383,8 +386,57 @@ bool Update() {
 		floorOffsetZ = 0.0f;
 	}
 
-	if (salaActual == 0)
+	if (1 == salaActual)
 	{
+		if (salaActual != salaAntFrame) {
+			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f);
+		}
+		// AJEDREZ
+		mLightsShader->use();
+
+		mLightsShader->setMat4("projection", projection);
+		mLightsShader->setMat4("view", view);
+
+		// Aplicamos transformaciones del modelo
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+		mLightsShader->setMat4("model", model);
+
+		// Configuramos propiedades de fuentes de luz
+		mLightsShader->setInt("numLights", (int)gLights.size());
+		for (size_t i = 0; i < gLights.size(); ++i) {
+			SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+			SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+			SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+			SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+			SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+			SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+		}
+
+		mLightsShader->setVec3("eye", camera.Position);
+
+		// Aplicamos propiedades materiales
+		mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
+		mLightsShader->setVec4("MaterialDiffuseColor", material1.diffuse);
+		mLightsShader->setVec4("MaterialSpecularColor", material1.specular);
+		mLightsShader->setFloat("transparency", material1.transparency);
+
+		model = glm::mat4(1.0f);
+
+		salaInicial->Draw(*mLightsShader);
+		RenderChess(mLightsShader, model);
+		glfwGetCursorPos(window, &xpos, &ypos);
+		posMouse = ScreenToWorld(xpos, ypos, projection, view, 0.2f);
+		salaAntFrame = 1;
+	}
+
+	if (2 == salaActual)
+	{
+		if (salaActual != salaAntFrame) {
+			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+		}
 		// *************** MODELOS ESTATICOS *********************************
 		// ESCENA JINETES
 			// terreno
@@ -759,11 +811,14 @@ bool Update() {
 		}
 
 		glUseProgram(0);
-
+		salaAntFrame = 2;
 	}
 
-	if (salaActual == 1)
+	if (3 == salaActual)
 	{
+		if (salaActual != salaAntFrame) {
+			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+		}
 		mLightsShader->use();
 
 		// Activamos para objetos transparentes
@@ -801,7 +856,7 @@ bool Update() {
 
 		templos->Draw(*mLightsShader);
 		model = glm::mat4(1.0f);
-
+		salaAntFrame = 3;
 	}
  
 	// glfw: swap buffers 
@@ -832,10 +887,14 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 
-	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
 		salaActual = 1;
-	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
-		salaActual = 0;
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+		salaActual = 2;
+	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+		salaActual = 3;
+
 
 	if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
 		door_offset += 0.01f;
