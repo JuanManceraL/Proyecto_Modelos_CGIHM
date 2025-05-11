@@ -305,6 +305,9 @@ bool Start() {
 	light01.Color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 	gLights.push_back(light01);
 
+	//Inicializacion de piezas de ajedrez
+	chessGame.Initialize();
+
 	return true;
 }
 
@@ -378,6 +381,17 @@ bool Update() {
 
 
 	// *************** MODELOS ESTATICOS *********************************
+		// AJEDREZ
+	{
+		mLightsShader->use();
+		glm::mat4 model = glm::mat4(1.0f);
+
+		mLightsShader->setMat4("projection", projection);
+		mLightsShader->setMat4("view", view);
+
+		mLightsShader->setMat4("model", model);
+		//RenderChess(mLightsShader, model);
+	}
 	// ESCENA JINETES
 		// terreno
 	{
