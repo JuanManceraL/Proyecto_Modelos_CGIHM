@@ -48,6 +48,7 @@ void processInput(GLFWwindow* window);
 void RenderChess(Shader* shader, glm::mat4 model);
 glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat4 view, float planeY);
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+void limitBox(float xMax, float xMin, float zMax, float zMin);
 
 // Gobals
 GLFWwindow* window;
@@ -391,6 +392,7 @@ bool Update() {
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f);
 		}
+		limitBox(4.2f, -4.2f, 4.2f, -4.2f);
 		// AJEDREZ
 		mLightsShader->use();
 
@@ -1053,11 +1055,11 @@ glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat
 	int cellX = static_cast<int>(round(relativeX));
 	int cellZ = static_cast<int>(round(relativeZ));
 
-	// Verificar si está dentro del tablero
-	if (cellX < 0 || cellX >= boardSize || cellZ < 0 || cellZ >= boardSize) {
-		// Fuera del tablero
-		return glm::vec3(9999.0f);
-	}
+	//// Verificar si está dentro del tablero
+	//if (cellX < 0 || cellX >= boardSize || cellZ < 0 || cellZ >= boardSize) {
+	//	// Fuera del tablero
+	//	return glm::vec3(9999.0f);
+	//}
 
 	// Calcular posición centrada
 	float snappedX = boardOriginX + cellX * cellSize;
@@ -1079,3 +1081,12 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 }
 
 //*****************************************************************************************************************************
+
+//****************************************Funcion para limitar camara en una caja****************************************
+void limitBox(float xMax, float xMin, float zMax, float zMin) {
+	if (camera.Position[0] > xMax) camera.Position[0] = xMax;
+	if (camera.Position[0] < xMin) camera.Position[0] = xMin;
+	if (camera.Position[2] > zMax) camera.Position[2] = zMax;
+	if (camera.Position[2] < zMin) camera.Position[2] = zMin;
+}
+//***********************************************************************************************************************
