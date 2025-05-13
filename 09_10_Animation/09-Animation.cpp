@@ -714,7 +714,7 @@ bool Update() {
 
 			// Aplicamos transformaciones del modelo
 			glm::mat4 model = glm::mat4(1.0f);
-			glm::vec3 position1(0.0f, 0.0f, 0.0f);
+			glm::vec3 position1(position.x-0.0f, position.y - 0.0f, position.z - 0.0f);
 			model = glm::translate(model, position1); // translate it down so it's at the center of the scene
 			model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
@@ -743,7 +743,7 @@ bool Update() {
 
 			// Aplicamos transformaciones del modelo
 			glm::mat4 model = glm::mat4(1.0f);
-			glm::vec3 position1(-2.3f, 0.0f, 0.0f);
+			glm::vec3 position1(position.x - 2.3f, position.y - 0.0f, position.z - 0.0f);
 			model = glm::translate(model, position1); // translate it down so it's at the center of the scene
 			model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
@@ -772,7 +772,7 @@ bool Update() {
 
 			// Aplicamos transformaciones del modelo
 			glm::mat4 model = glm::mat4(1.0f);
-			glm::vec3 position1(-4.1f, 0.0f, 0.0f);
+			glm::vec3 position1(position.x - 4.1f, position.y - 0.0f, position.z - 0.0f);
 			model = glm::translate(model, position1); // translate it down so it's at the center of the scene
 			model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
@@ -802,7 +802,7 @@ bool Update() {
 
 			// Aplicamos transformaciones del modelo
 			glm::mat4 model = glm::mat4(1.0f);
-			glm::vec3 position1(-6.4f, 0.0f, 0.0f);
+			glm::vec3 position1(position.x - 6.4f, position.y - 0.0f, position.z - 0.0f);
 			model = glm::translate(model, position1); // translate it down so it's at the center of the scene
 			model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
