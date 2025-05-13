@@ -95,6 +95,9 @@ Model* llanura_irregular;
 Model* templos;
 Model* salaInicial;
 
+Model* AldeaVikinga;
+Model* Yucatas;
+
 
 Model* gridMesh;
 
@@ -277,7 +280,9 @@ bool Start() {
 	monte = new Model("models/mongol/montes.fbx");
 	llanura_irregular = new Model("models/mongol/llanura_irregular.obj");
 	templos = new Model("models/mongol/ESCENAS/AreaTemplos.fbx");
-
+	
+	AldeaVikinga = new Model("models/vikingos/PuebloVik.fbx");
+	Yucatas = new Model("models/mongol/Yucatas.fbx");
 
 	gridMesh = new Model("models/IllumModels/grid.fbx");
 
@@ -434,7 +439,7 @@ bool Update() {
 		salaAntFrame = 1;
 	}
 
-	if (2 == salaActual)
+	if (3 == salaActual)
 	{
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
@@ -813,10 +818,10 @@ bool Update() {
 		}
 
 		glUseProgram(0);
-		salaAntFrame = 2;
+		salaAntFrame = 3;
 	}
 
-	if (3 == salaActual)
+	if (4 == salaActual)
 	{
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
@@ -858,7 +863,97 @@ bool Update() {
 
 		templos->Draw(*mLightsShader);
 		model = glm::mat4(1.0f);
-		salaAntFrame = 3;
+		salaAntFrame = 4;
+	}
+
+	if (5 == salaActual)
+	{
+		if (salaActual != salaAntFrame) {
+			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+		}
+		mLightsShader->use();
+
+		// Activamos para objetos transparentes
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		mLightsShader->setMat4("projection", projection);
+		mLightsShader->setMat4("view", view);
+
+		// Aplicamos transformaciones del modelo
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0, -8.0f)); // ¡Nuevo desplazamiento!
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		mLightsShader->setMat4("model", model);
+
+		// Configuramos propiedades de fuentes de luz
+		mLightsShader->setInt("numLights", (int)gLights.size());
+		for (size_t i = 0; i < gLights.size(); ++i) {
+			SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+			SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+			SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+			SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+			SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+			SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+		}
+
+		mLightsShader->setVec3("eye", camera.Position);
+
+		// Aplicamos propiedades materiales
+		mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
+		mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
+		mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
+		mLightsShader->setFloat("transparency", material0.transparency);
+
+		AldeaVikinga->Draw(*mLightsShader);
+		model = glm::mat4(1.0f);
+		salaAntFrame = 5;
+	}
+
+	if (2 == salaActual)
+	{
+		if (salaActual != salaAntFrame) {
+			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+		}
+		mLightsShader->use();
+
+		// Activamos para objetos transparentes
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		mLightsShader->setMat4("projection", projection);
+		mLightsShader->setMat4("view", view);
+
+		// Aplicamos transformaciones del modelo
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0, -8.0f)); // ¡Nuevo desplazamiento!
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		mLightsShader->setMat4("model", model);
+
+		// Configuramos propiedades de fuentes de luz
+		mLightsShader->setInt("numLights", (int)gLights.size());
+		for (size_t i = 0; i < gLights.size(); ++i) {
+			SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+			SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+			SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+			SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+			SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+			SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+		}
+
+		mLightsShader->setVec3("eye", camera.Position);
+
+		// Aplicamos propiedades materiales
+		mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
+		mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
+		mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
+		mLightsShader->setFloat("transparency", material0.transparency);
+
+		Yucatas->Draw(*mLightsShader);
+		model = glm::mat4(1.0f);
+		salaAntFrame = 2;
 	}
  
 	// glfw: swap buffers 
@@ -896,6 +991,14 @@ void processInput(GLFWwindow* window)
 		salaActual = 2;
 	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
 		salaActual = 3;
+	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+		salaActual = 4;
+	if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+		salaActual = 5;
+	if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
+		salaActual = 6;
+	if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
+		salaActual = 7;
 
 
 	if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
