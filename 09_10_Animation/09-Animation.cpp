@@ -85,6 +85,7 @@ float	  door_rotation = 0.0f;
 Shader* mLightsShader;
 Shader* proceduralShader;
 Shader* wavesShader;
+Shader* fresnelShader;
 
 Shader* cubemapShader;
 Shader* dynamicShader;
@@ -97,7 +98,10 @@ Model* templos;
 Model* salaInicial;
 
 Model* AldeaVikinga;
+Model* aguapueblo;
 Model* Yucatas;
+Model* EmbarcacionVik;
+Model* aguapueblo_2;
 
 
 Model* gridMesh;
@@ -270,6 +274,7 @@ bool Start() {
 	wavesShader = new Shader("shaders/13_wavesAnimation.vs", "shaders/13_wavesAnimation.fs");
 	cubemapShader = new Shader("shaders/10_vertex_cubemap.vs", "shaders/10_fragment_cubemap.fs");
 	dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
+	fresnelShader = new Shader("shaders/11_fresnel.vs", "shaders/11_fresnel.fs");
 
 	// Máximo número de huesos: 100
 	dynamicShader->setBonesIDs(MAX_RIGGING_BONES);
@@ -283,7 +288,10 @@ bool Start() {
 	templos = new Model("models/mongol/ESCENAS/AreaTemplos.fbx");
 	
 	AldeaVikinga = new Model("models/vikingos/PuebloVik.fbx");
+	aguapueblo = new Model("models/vikingos/aguapueblo.fbx");
 	Yucatas = new Model("models/mongol/Yucatas.fbx");
+	EmbarcacionVik = new Model("models/vikingos/embarcacion.fbx");
+	aguapueblo_2 = new Model("models/vikingos/embarcacion.fbx");
 
 	gridMesh = new Model("models/IllumModels/grid.fbx");
 
@@ -924,46 +932,127 @@ bool Update() {
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
 		}
-		mLightsShader->use();
+		{
+			mLightsShader->use();
 
-		// Activamos para objetos transparentes
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			// Activamos para objetos transparentes
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		mLightsShader->setMat4("projection", projection);
-		mLightsShader->setMat4("view", view);
+			mLightsShader->setMat4("projection", projection);
+			mLightsShader->setMat4("view", view);
 
-		// Aplicamos transformaciones del modelo
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0, -8.0f)); // ¡Nuevo desplazamiento!
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-		mLightsShader->setMat4("model", model);
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0, -8.0f)); // ¡Nuevo desplazamiento!
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+			mLightsShader->setMat4("model", model);
 
-		// Configuramos propiedades de fuentes de luz
-		mLightsShader->setInt("numLights", (int)gLights.size());
-		for (size_t i = 0; i < gLights.size(); ++i) {
-			SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
-			SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
-			SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
-			SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
-			SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
-			SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+			// Configuramos propiedades de fuentes de luz
+			mLightsShader->setInt("numLights", (int)gLights.size());
+			for (size_t i = 0; i < gLights.size(); ++i) {
+				SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+				SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+				SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+				SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+				SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+				SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+			}
+
+			mLightsShader->setVec3("eye", camera.Position);
+
+			// Aplicamos propiedades materiales
+			mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
+			mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
+			mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
+			mLightsShader->setFloat("transparency", material0.transparency);
+
+			AldeaVikinga->Draw(*mLightsShader);
+			model = glm::mat4(1.0f);
 		}
 
-		mLightsShader->setVec3("eye", camera.Position);
+		{
+			// Activamos el shader de Phong
+			fresnelShader->use();
 
-		// Aplicamos propiedades materiales
-		mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
-		mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
-		mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
-		mLightsShader->setFloat("transparency", material0.transparency);
+			// Activamos para objetos transparentes
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		AldeaVikinga->Draw(*mLightsShader);
-		model = glm::mat4(1.0f);
+			// Aplicamos transformaciones de proyección y cámara (si las hubiera)
+			fresnelShader->setMat4("projection", projection);
+			fresnelShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, -7.5f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+			fresnelShader->setMat4("model", model);
+			fresnelShader->setVec3("cameraPosition", camera.Position);
+			fresnelShader->setFloat("mRefractionRatio", 1.0f / 1.333f); // 1.333 Agua
+			fresnelShader->setFloat("_Bias", 0.5f);
+			fresnelShader->setFloat("_Scale", 0.5f);
+			fresnelShader->setFloat("_Power", 1.0f);
+
+			aguapueblo->Draw(*fresnelShader);
+
+		}
+
+		glUseProgram(0);
 		salaAntFrame = 5;
 	}
 
+	if (6 == salaActual)
+	{
+		if (salaActual != salaAntFrame) {
+			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+		}
+		{
+			mLightsShader->use();
+
+			// Activamos para objetos transparentes
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			mLightsShader->setMat4("projection", projection);
+			mLightsShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0, -8.0f)); // ¡Nuevo desplazamiento!
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+			mLightsShader->setMat4("model", model);
+
+			// Configuramos propiedades de fuentes de luz
+			mLightsShader->setInt("numLights", (int)gLights.size());
+			for (size_t i = 0; i < gLights.size(); ++i) {
+				SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+				SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+				SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+				SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+				SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+				SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+			}
+
+			mLightsShader->setVec3("eye", camera.Position);
+
+			// Aplicamos propiedades materiales
+			mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
+			mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
+			mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
+			mLightsShader->setFloat("transparency", material0.transparency);
+
+			EmbarcacionVik->Draw(*mLightsShader);
+			model = glm::mat4(1.0f);
+		}
+
+		glUseProgram(0);
+		salaAntFrame = 6;
+	}
 
  
 	// glfw: swap buffers 
@@ -1007,8 +1096,6 @@ void processInput(GLFWwindow* window)
 		salaActual = 5;
 	if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
 		salaActual = 6;
-	if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
-		salaActual = 7;
 
 
 	if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
