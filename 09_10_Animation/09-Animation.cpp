@@ -49,6 +49,7 @@ void RenderChess(Shader* shader, glm::mat4 model);
 glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat4 view, float planeY);
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void limitBox(float xMax, float xMin, float zMax, float zMin);
+void teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 newPos);
 
 // Gobals
 GLFWwindow* window;
@@ -392,6 +393,9 @@ bool Update() {
 		floorOffsetZ = 0.0f;
 	}
 
+	glfwGetCursorPos(window, &xpos, &ypos);
+	posMouse = ScreenToWorld(xpos, ypos, projection, view, 0.2f);
+
 	if (1 == salaActual)
 	{
 		if (salaActual != salaAntFrame) {
@@ -434,9 +438,52 @@ bool Update() {
 
 		salaInicial->Draw(*mLightsShader);
 		RenderChess(mLightsShader, model);
-		glfwGetCursorPos(window, &xpos, &ypos);
-		posMouse = ScreenToWorld(xpos, ypos, projection, view, 0.2f);
 		salaAntFrame = 1;
+	}
+
+	if (2 == salaActual)
+	{
+		if (salaActual != salaAntFrame) {
+			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+		}
+		mLightsShader->use();
+
+		// Activamos para objetos transparentes
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		mLightsShader->setMat4("projection", projection);
+		mLightsShader->setMat4("view", view);
+
+		// Aplicamos transformaciones del modelo
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0, -8.0f)); // ¡Nuevo desplazamiento!
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		mLightsShader->setMat4("model", model);
+
+		// Configuramos propiedades de fuentes de luz
+		mLightsShader->setInt("numLights", (int)gLights.size());
+		for (size_t i = 0; i < gLights.size(); ++i) {
+			SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+			SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+			SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+			SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+			SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+			SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+		}
+
+		mLightsShader->setVec3("eye", camera.Position);
+
+		// Aplicamos propiedades materiales
+		mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
+		mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
+		mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
+		mLightsShader->setFloat("transparency", material0.transparency);
+
+		Yucatas->Draw(*mLightsShader);
+		model = glm::mat4(1.0f);
+		salaAntFrame = 2;
 	}
 
 	if (3 == salaActual)
@@ -824,7 +871,7 @@ bool Update() {
 	if (4 == salaActual)
 	{
 		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+			camera.Position = glm::vec3(0.0f, 2.0f, 0.0f); //Poner aqui la posicion fija deseada
 		}
 		mLightsShader->use();
 
@@ -863,6 +910,12 @@ bool Update() {
 
 		templos->Draw(*mLightsShader);
 		model = glm::mat4(1.0f);
+		teleportCamera(6.3f, -5.7f, -0.9, -5.0f, glm::vec3(0.0f, 7.5f, -11.0f));
+		teleportCamera(6.3f, -5.7f, -10, -4.9f, glm::vec3(0.0f, 2.0f, 0.0f));
+		teleportCamera(-50.0f, -61.0f, -14.0f, -17.0f, glm::vec3(-55.0f, 7.5f, -23.0f));
+		teleportCamera(-50.0f, -61.0f, -22.0f, -16.9f, glm::vec3(-55.0f, 2.0f, -12.0f));
+		teleportCamera(50.0f, 61.0f, -14.0f, -17.0f, glm::vec3(55.0f, 7.5f, -23.0f));
+		teleportCamera(50.0f, 61.0f, -22.0f, -16.9f, glm::vec3(55.0f, 2.0f, -12.0f));
 		salaAntFrame = 4;
 	}
 
@@ -911,50 +964,7 @@ bool Update() {
 		salaAntFrame = 5;
 	}
 
-	if (2 == salaActual)
-	{
-		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
-		}
-		mLightsShader->use();
 
-		// Activamos para objetos transparentes
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		mLightsShader->setMat4("projection", projection);
-		mLightsShader->setMat4("view", view);
-
-		// Aplicamos transformaciones del modelo
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0, -8.0f)); // ¡Nuevo desplazamiento!
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-		mLightsShader->setMat4("model", model);
-
-		// Configuramos propiedades de fuentes de luz
-		mLightsShader->setInt("numLights", (int)gLights.size());
-		for (size_t i = 0; i < gLights.size(); ++i) {
-			SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
-			SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
-			SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
-			SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
-			SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
-			SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
-		}
-
-		mLightsShader->setVec3("eye", camera.Position);
-
-		// Aplicamos propiedades materiales
-		mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
-		mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
-		mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
-		mLightsShader->setFloat("transparency", material0.transparency);
-
-		Yucatas->Draw(*mLightsShader);
-		model = glm::mat4(1.0f);
-		salaAntFrame = 2;
-	}
  
 	// glfw: swap buffers 
 	glfwSwapBuffers(window);
@@ -1193,3 +1203,13 @@ void limitBox(float xMax, float xMin, float zMax, float zMin) {
 	if (camera.Position[2] < zMin) camera.Position[2] = zMin;
 }
 //***********************************************************************************************************************
+
+//****************************************Funcion para transportar la camara segun su posicion****************************************
+void teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 newPos) {
+	if (xMin > xMax) std::swap(xMin, xMax);
+	if (zMin > zMax) std::swap(zMin, zMax);
+	if (camera.Position[0] <= xMax && camera.Position[0] >= xMin) {
+		if (camera.Position[2] <= zMax && camera.Position[2] >= zMin) camera.Position = newPos;
+	}
+}
+//************************************************************************************************************************************
