@@ -258,7 +258,7 @@ bool Start() {
 	glfwSetMouseButtonCallback(window, MouseButtonCallback);
 
 	// Ocultar el cursor mientras se rota la escena
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// glad: Cargar todos los apuntadores
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -410,6 +410,12 @@ bool Update() {
 	{
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f);
+		}
+		if (chessGame.inspectMode) {
+			camera.Position = chessGame.inspectCameraPosition;
+			camera.Front = chessGame.inspectCameraFront;
+			camera.Right = glm::normalize(glm::cross(camera.Front, camera.WorldUp));
+			camera.Up = glm::normalize(glm::cross(camera.Right, camera.Front));
 		}
 		limitBox(4.2f, -4.2f, 4.2f, -4.2f);
 		// AJEDREZ
@@ -1162,6 +1168,15 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
 		activeCamera = 1;
 
+	if (chessGame.inspectMode) {
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+			chessGame.inspectRotation += 1.0f;
+		}
+		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+			chessGame.inspectRotation -= 1.0f;
+		}
+	}
+
 }
 
 // glfw: Actualizamos el puerto de vista si hay cambios del tamaño
@@ -1205,14 +1220,23 @@ void RenderChess(Shader* shader, glm::mat4 model) {
 		if (current.alive) {
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, *current.position);
+			// Aplicar rotación si está en modo inspección y es la pieza seleccionada
+			if (chessGame.inspectMode && chessGame.selected == &current) {
+				model = glm::rotate(model, glm::radians(chessGame.inspectRotation), glm::vec3(0.0f, 1.0f, 0.0f));
+			}
 			shader->setMat4("model", model);
 			current.model->Draw(*shader);
 		}
 	}
+
 	for (Character& current : chessGame.blacks) {
 		if (current.alive) {
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, *current.position);
+			// Aplicar rotación si está en modo inspección y es la pieza seleccionada
+			if (chessGame.inspectMode && chessGame.selected == &current) {
+				model = glm::rotate(model, glm::radians(chessGame.inspectRotation), glm::vec3(0.0f, 1.0f, 0.0f));
+			}
 			shader->setMat4("model", model);
 			current.model->Draw(*shader);
 		}
@@ -1279,6 +1303,10 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	}
 	else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
 		chessGame.HandleRightClick();
+	}
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
+	{
+		chessGame.HandleMiddleClick(posMouse, camera);
 	}
 }
 

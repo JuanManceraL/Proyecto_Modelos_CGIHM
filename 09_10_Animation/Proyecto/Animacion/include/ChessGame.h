@@ -3,6 +3,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <model.h>
+#include <camera.h>
 #include "Board.h"
 #include "Character.h"
 
@@ -32,6 +33,8 @@ public:
     Board& GetBoard();
     const std::vector<Character>& GetWhites() const;
     const std::vector<Character>& GetBlacks() const;
+
+    bool HandleMiddleClick(const glm::vec3& posMouse, Camera &camara);
 
     // Declaraciones de las variables miembro (sin inicialización)
     glm::vec3 reyBlancoPos;
@@ -71,6 +74,14 @@ public:
     Board board;
     std::vector<Character> whites;
     std::vector<Character> blacks;
-    bool pick_place;
-    float originX, originZ, destinationX, destinationZ;
+    bool pick_place, inspectMode = false;
+    Character* selected;
+    glm::vec3 inspectPosition;
+    glm::vec3 originalPosition;
+    glm::vec3 inspectCameraPosition;
+    glm::vec3 inspectCameraFront;
+    glm::vec3 originalCameraPosition;
+    glm::vec3 originalCameraFront;
+    float inspectRotation;
+    float originX, originZ, destinationX, destinationZ, posOrigx, posOrigZ;
 };

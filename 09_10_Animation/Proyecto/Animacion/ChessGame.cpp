@@ -43,6 +43,10 @@ ChessGame::ChessGame() : pick_place(true) {
         glm::vec3(-1.5f, 0.2f, 1.5f),
         glm::vec3(-2.1f, 0.2f, 1.5f)
     };
+    inspectPosition = glm::vec3(-2.5f, 1.6f, 0.0f);
+    inspectPosition = glm::vec3(-2.5f, 1.6f, 0.0f);
+    inspectCameraPosition = glm::vec3(0.0f, 2.0f, 0.0f);
+    inspectCameraFront = glm::normalize(glm::vec3(-1.5f, 0.0f, 0.0f));
 }
 
 ChessGame::~ChessGame() {
@@ -165,6 +169,54 @@ const std::vector<Character>& ChessGame::GetWhites() const {
 
 const std::vector<Character>& ChessGame::GetBlacks() const {
     return blacks;
+}
+
+bool ChessGame::HandleMiddleClick(const glm::vec3& posMouse, Camera& camera) {
+    if (posMouse.x == 9999.0f) return false;
+
+    if (inspectMode) {
+        // Salir del modo inspección
+        if (selected) {
+            *selected->position = originalPosition;
+            selected = nullptr;
+        }
+        // Restaurar cámara
+        camera.Position = originalCameraPosition;
+        camera.Front = originalCameraFront;
+        camera.Right = glm::normalize(glm::cross(camera.Front, camera.WorldUp));
+        camera.Up = glm::normalize(glm::cross(camera.Right, camera.Front));
+
+        inspectMode = false;
+        return true;
+    }
+    else {
+        // Entrar en modo inspección
+        auto cell = board.getCellFromPosition(posMouse.x, posMouse.z);
+        if (board.haveCharacter(cell.first, cell.second)) {
+            selected = board.cells[cell.first][cell.second].character;
+            originalPosition = *selected->position;
+
+            // Mover pieza a posición de inspección
+            selected->position->x = inspectPosition.x;
+            selected->position->y = inspectPosition.y;
+            selected->position->z = inspectPosition.z;
+
+            // Guardar posición original de la cámara
+            originalCameraPosition = camera.Position;
+            originalCameraFront = camera.Front;
+
+            // Mover cámara a posición de inspección
+            camera.Position = inspectCameraPosition;
+            camera.Front = inspectCameraFront;
+            camera.Right = glm::normalize(glm::cross(camera.Front, camera.WorldUp));
+            camera.Up = glm::normalize(glm::cross(camera.Right, camera.Front));
+
+            inspectRotation = 0.0f;
+            inspectMode = true;
+            return true;
+        }
+    }
+    return false;
 }
 
 
