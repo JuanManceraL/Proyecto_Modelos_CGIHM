@@ -51,6 +51,8 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void limitBox(float xMax, float xMin, float zMax, float zMin);
 void teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 newPos);
 
+bool reachBox(float xMax, float xMin, float zMax, float zMin);
+
 // Gobals
 GLFWwindow* window;
 
@@ -1295,8 +1297,15 @@ void limitBox(float xMax, float xMin, float zMax, float zMin) {
 void teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 newPos) {
 	if (xMin > xMax) std::swap(xMin, xMax);
 	if (zMin > zMax) std::swap(zMin, zMax);
-	if (camera.Position[0] <= xMax && camera.Position[0] >= xMin) {
-		if (camera.Position[2] <= zMax && camera.Position[2] >= zMin) camera.Position = newPos;
-	}
+	if (reachBox(xMax, xMin, zMax, zMin)) camera.Position = newPos;
 }
 //************************************************************************************************************************************
+
+//****************************************Funcion para detectar si la camara ha llegado a una zona cuadrada definida****************************************
+bool reachBox(float xMax, float xMin, float zMax, float zMin) {
+	if (camera.Position[0] <= xMax && camera.Position[0] >= xMin) {
+		if (camera.Position[2] <= zMax && camera.Position[2] >= zMin) return true;
+	}
+	return false;
+}
+//***********************************************************************************************************************************************************
