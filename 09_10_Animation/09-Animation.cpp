@@ -36,6 +36,9 @@ using namespace irrklang;
 float floorOffsetZ = 0.0f; // Variable para el desplazamiento del piso
 float floorSpeed = 1.0f;   // Velocidad del movimiento (ajústala según necesites)
 
+const float DOOR_PROXIMITY_DISTANCE = 3.0f; // Distancia para activar apertura
+
+
 // Functions
 bool Start();
 bool Update();
@@ -97,12 +100,17 @@ Model* terrenos;
 Model* monte;
 Model* llanura_irregular;
 Model* templos;
+Model* puerta1;
+Model* puerta2;
+
+
 Model* salaInicial;
 
 Model* AldeaVikinga;
 Model* aguapueblo;
 Model* Yucatas;
 Model* EmbarcacionVik;
+Model* aguaembarcacion;
 Model* aguapueblo_2;
 
 
@@ -235,6 +243,18 @@ int main()
 
 }
 
+//SENSOR PARA LA PEURTA
+bool isPlayerNearDoor(const glm::vec3& playerPosition, const glm::vec3& doorPosition, float threshold) {
+	// Ignora la coordenada Y para comparación solo en plano XZ
+	glm::vec2 playerXZ(playerPosition.x, playerPosition.z);
+	glm::vec2 doorXZ(doorPosition.x, doorPosition.z);
+	float distance = glm::distance(playerXZ, doorXZ);
+
+	std::cout << "Calculated 2D distance: " << distance << std::endl; // Debug
+
+	return distance < threshold;
+}
+
 bool Start() {
 	// Inicialización de GLFW
 
@@ -288,11 +308,16 @@ bool Start() {
 	monte = new Model("models/mongol/montes.fbx");
 	llanura_irregular = new Model("models/mongol/llanura_irregular.obj");
 	templos = new Model("models/mongol/ESCENAS/AreaTemplos.fbx");
+	// Puertas de templos
+	puerta1= new Model("models/mongol/ESCENAS/puerta1.fbx");
+	puerta2 = new Model("models/mongol/ESCENAS/puerta2.fbx");
+
 	
 	AldeaVikinga = new Model("models/vikingos/PuebloVik.fbx");
 	aguapueblo = new Model("models/vikingos/aguapueblo.fbx");
 	Yucatas = new Model("models/mongol/Yucatas.fbx");
 	EmbarcacionVik = new Model("models/vikingos/embarcacion.fbx");
+	aguaembarcacion = new Model("models/vikingos/agua_embarcacion.fbx");
 	aguapueblo_2 = new Model("models/vikingos/embarcacion.fbx");
 
 	gridMesh = new Model("models/IllumModels/grid.fbx");
@@ -889,6 +914,8 @@ bool Update() {
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(0.0f, 2.0f, 0.0f); //Poner aqui la posicion fija deseada
 		}
+		//TEMPLO
+		{
 		mLightsShader->use();
 
 		// Activamos para objetos transparentes
@@ -932,6 +959,118 @@ bool Update() {
 		teleportCamera(-50.0f, -61.0f, -22.0f, -16.9f, glm::vec3(-55.0f, 2.0f, -12.0f));
 		teleportCamera(50.0f, 61.0f, -14.0f, -17.0f, glm::vec3(55.0f, 7.5f, -23.0f));
 		teleportCamera(50.0f, 61.0f, -22.0f, -16.9f, glm::vec3(55.0f, 2.0f, -12.0f));
+		}
+
+		//PUERTAS
+		{
+
+			// Umbral de distancia para activar/desactivar (5 metros)
+			const float DOOR_ACTIVATION_DISTANCE = 5.0f;
+
+			// En tu función Update():
+			glm::vec3 doorPosition = glm::vec3(0.0f, 0.0f, -23.9f); // Posición real de la puerta
+			float currentDistance = glm::distance(
+				glm::vec2(-camera.Position.x, -camera.Position.z),
+				glm::vec2(doorPosition.x, doorPosition.z)
+			);
+
+			std::cout << "Current distance to door: " << currentDistance << std::endl; // Debug
+
+			if (currentDistance < DOOR_ACTIVATION_DISTANCE) {
+				// Abrir progresivamente
+				door_offset = glm::min(door_offset + 2.0f * deltaTime, 5.0f);
+				std::cout << "Opening door... Current offset: " << door_offset << std::endl;
+			}
+			else if (currentDistance > DOOR_ACTIVATION_DISTANCE + 1.0f) { // Pequeño hysteresis
+				// Cerrar progresivamente
+				door_offset = glm::max(door_offset - 2.0f * deltaTime, 0.0f);
+				std::cout << "Closing door... Current offset: " << door_offset << std::endl;
+			}
+
+
+
+			mLightsShader->use();
+
+			// Activamos para objetos transparentes
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			mLightsShader->setMat4("projection", projection);
+			mLightsShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(door_offset, 0.0, -79.9f)); // ¡Nuevo desplazamiento!
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+
+			mLightsShader->setMat4("model", model);
+
+			// Configuramos propiedades de fuentes de luz
+			mLightsShader->setInt("numLights", (int)gLights.size());
+			for (size_t i = 0; i < gLights.size(); ++i) {
+				SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+				SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+				SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+				SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+				SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+				SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+			}
+
+			mLightsShader->setVec3("eye", camera.Position);
+
+			// Aplicamos propiedades materiales
+			mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
+			mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
+			mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
+			mLightsShader->setFloat("transparency", material0.transparency);
+
+			puerta1->Draw(*mLightsShader);
+			model = glm::mat4(1.0f);
+		}
+
+		{
+			mLightsShader->use();
+
+			// Activamos para objetos transparentes
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			mLightsShader->setMat4("projection", projection);
+			mLightsShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0, 0.0, -80.0f)); // ¡Nuevo desplazamiento!
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+
+			mLightsShader->setMat4("model", model);
+
+			// Configuramos propiedades de fuentes de luz
+			mLightsShader->setInt("numLights", (int)gLights.size());
+			for (size_t i = 0; i < gLights.size(); ++i) {
+				SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+				SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+				SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+				SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+				SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+				SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+			}
+
+			mLightsShader->setVec3("eye", camera.Position);
+
+			// Aplicamos propiedades materiales
+			mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
+			mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
+			mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
+			mLightsShader->setFloat("transparency", material0.transparency);
+
+			puerta2->Draw(*mLightsShader);
+			model = glm::mat4(1.0f);
+		}
+
+
 		salaAntFrame = 4;
 	}
 
@@ -1001,10 +1140,9 @@ bool Update() {
 			fresnelShader->setMat4("model", model);
 			fresnelShader->setVec3("cameraPosition", camera.Position);
 			fresnelShader->setFloat("mRefractionRatio", 1.0f / 1.333f); // 1.333 Agua
-			fresnelShader->setFloat("_Bias", 0.5f);
+			fresnelShader->setFloat("_Bias", 0.2f);
 			fresnelShader->setFloat("_Scale", 0.5f);
-			fresnelShader->setFloat("_Power", 1.0f);
-
+			fresnelShader->setFloat("_Power", 0.5f);
 			aguapueblo->Draw(*fresnelShader);
 
 		}
@@ -1018,6 +1156,7 @@ bool Update() {
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
 		}
+
 		{
 			mLightsShader->use();
 
@@ -1056,6 +1195,38 @@ bool Update() {
 
 			EmbarcacionVik->Draw(*mLightsShader);
 			model = glm::mat4(1.0f);
+		}
+
+		{
+			// Activamos el shader de Phong
+			wavesShader->use();
+
+			// Activamos para objetos transparentes
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			// Aplicamos transformaciones de proyección y cámara (si las hubiera)
+			wavesShader->setMat4("projection", projection);
+			wavesShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+			wavesShader->setMat4("model", model);
+			wavesShader->setVec3("cameraPosition", camera.Position);
+			wavesShader->setFloat("mRefractionRatio", 1.0f / 1.333f); // 1.333 Agua
+			wavesShader->setFloat("_Bias", 0.2f);
+			wavesShader->setFloat("_Scale", 0.5f);
+			wavesShader->setFloat("_Power", 0.5f);
+			wavesShader->setFloat("time", wavesTime);
+			wavesShader->setFloat("radius", 1.0f);
+			wavesShader->setFloat("height", 1.0f);
+
+			aguaembarcacion->Draw(*wavesShader);
+			wavesTime += 0.01;
+
 		}
 
 		glUseProgram(0);
@@ -1106,13 +1277,23 @@ void processInput(GLFWwindow* window)
 		salaActual = 6;
 
 
-	if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
 		door_offset += 0.01f;
-	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
+		// Limitar máximo 
+		if (door_offset > 3.5f) {
+			door_offset = 3.5f;
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
 		door_offset -= 0.01f;
-	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
+		// Limitar mínimo a 0
+		if (door_offset < 0.0f) {
+			door_offset = 0.0f;
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
 		door_rotation += 1.f;
-	if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
 		door_rotation -= 1.f;
 
 	// Character movement
@@ -1134,34 +1315,6 @@ void processInput(GLFWwindow* window)
 		camera3rd.Position.y += 1.7f;
 		camera3rd.Position -= trdpersonOffset * forwardView;
 	}
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-		rotateCharacter += 0.5f;
-
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::vec4 viewVector = model * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-		forwardView = glm::vec3(viewVector);
-		forwardView = glm::normalize(forwardView);
-
-		camera3rd.Front = forwardView;
-		camera3rd.Position = position;
-		camera3rd.Position.y += 1.7f;
-		camera3rd.Position -= trdpersonOffset * forwardView;
-	}
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-		rotateCharacter -= 0.5f;
-
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::vec4 viewVector = model * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-		forwardView = glm::vec3(viewVector);
-		forwardView = glm::normalize(forwardView);
-
-		camera3rd.Front = forwardView;
-		camera3rd.Position = position;
-		camera3rd.Position.y += 1.7f;
-		camera3rd.Position -= trdpersonOffset * forwardView;
-	}
 
 	if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
 		activeCamera = 0;
@@ -1177,7 +1330,9 @@ void processInput(GLFWwindow* window)
 		}
 	}
 
+
 }
+
 
 // glfw: Actualizamos el puerto de vista si hay cambios del tamaño
 // de la ventana

@@ -38,6 +38,6 @@ void main(void)
 	vec4 fresnelColor = reflectionCoefficient * reflectedColor + (1 - reflectionCoefficient) * refractedColor;
 	vec4 texel = texture(texture_diffuse1, TexCoords);
 
-	FragColor = fresnelColor;
+	FragColor = fresnelColor*texel;
 	FragColor.a = 1.0f;
 }

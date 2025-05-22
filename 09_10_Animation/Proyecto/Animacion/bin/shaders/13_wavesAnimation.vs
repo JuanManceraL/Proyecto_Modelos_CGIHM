@@ -1,4 +1,7 @@
 #version 330 core
+
+#extension GL_NV_shadow_samplers_cube : enable
+
 layout (location = 0) in vec3  aPos;
 layout (location = 1) in vec3  aNormal;
 layout (location = 2) in vec2  aTexCoords;
@@ -11,18 +14,56 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+
+uniform vec3 cameraPosition;
+
 uniform float time;
 uniform float radius;
 uniform float height;
+
+
+// Fresnel parameters
+// bias, scale and power are values exposed to allow control over the appearance of the Fresnel effect
+uniform float mRefractionRatio;
+uniform float _Bias;
+uniform float _Scale;
+uniform float _Power;
+
+// Outgoing Fresnel reflection and refraction parameters
+out vec3  vReflect;
+out vec3  vRefract[3];
+out float reflectionCoefficient;
 
 void main()
 {
     
     vec4 PosL = vec4(aPos, 1.0f);
-    // PosL.z += 0.5f * sin(PosL.x + time);
-    // PosL.z += 0.5f * sin(PosL.y + time);
+
+    gl_Position = projection * view * model * PosL;  
+
+    PosL.z += 0.5f * sin(PosL.x + (0.06)*time);
+    PosL.z += 0.5f * sin(PosL.y + (0.06)*time);
 
     gl_Position = projection * view * model * PosL;
+
+   // Position of the vertex, in worldspace : model * position
+    vec3 posWorld = (model * PosL).xyz;
+
+    // worldNormal: is the world space normal of the current point
+    vec3 normWorld = normalize( mat3( model[0].xyz, model[1].xyz, model[2].xyz ) * aNormal );
+
+    // Fresnel calculations
+    // I is the vector from the eye to a point on the surface
+    vec3 I = normalize(posWorld - cameraPosition);
+
+    vReflect = reflect( I, normWorld );
+    vRefract[0] = refract( I, normWorld, mRefractionRatio * 1.0f ); // RED CHANNEL REFRACTION // 1.0
+    vRefract[1] = refract( I, normWorld, mRefractionRatio * 0.99f ); // GREEN CHANNEL REFRACTION // 0.99
+    vRefract[2] = refract( I, normWorld, mRefractionRatio * 0.98f ); // BLUE CHANNEL REFRACTION // 0.98
+
+    // reflectionCoefficient:  Schlick Approximation
+    // An Approximation of the Fresnel Equation
+    reflectionCoefficient = max(0, min(1,_Bias + _Scale * pow( 1.0f + dot( I, normWorld ), _Power ))); // Fresnel equation
 
     TexCoords = aTexCoords;  
 }
