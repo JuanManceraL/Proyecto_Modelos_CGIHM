@@ -52,7 +52,7 @@ void RenderChess(Shader* shader, glm::mat4 model);
 glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat4 view, float planeY);
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void limitBox(float xMax, float xMin, float zMax, float zMin);
-void teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 newPos);
+bool teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 newPos);
 
 bool reachBox(float xMax, float xMin, float zMax, float zMin);
 
@@ -152,6 +152,11 @@ float wavesTime = 0.0f;
 //Salas
 int salaActual = 1;
 int salaAntFrame = 1;
+
+//Camara fija
+bool fixedCam = false;
+glm::vec3 lastPos(0.0f, 2.0f, 0.0f);
+bool first = false;
 
 // Audio
 ISoundEngine* SoundEngine = createIrrKlangDevice();
@@ -435,12 +440,21 @@ bool Update() {
 	{
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f);
+			lastPos = camera.Position;
 		}
 		if (chessGame.inspectMode) {
 			camera.Position = chessGame.inspectCameraPosition;
 			camera.Front = chessGame.inspectCameraFront;
 			camera.Right = glm::normalize(glm::cross(camera.Front, camera.WorldUp));
 			camera.Up = glm::normalize(glm::cross(camera.Right, camera.Front));
+		}
+
+		if (fixedCam) {
+			if (first) { lastPos = camera.Position; first = false; };
+			camera.Position = camera.Position = glm::vec3(-3.0f, 4.5f, 0.0f);
+		}
+		else {
+			if (!first) { camera.Position = lastPos; first = true; }
 		}
 		limitBox(4.2f, -4.2f, 4.2f, -4.2f);
 		// AJEDREZ
@@ -486,6 +500,15 @@ bool Update() {
 	{
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+			lastPos = camera.Position;
+		}
+
+		if (fixedCam) {
+			if (first) { lastPos = camera.Position; first = false; };
+			camera.Position = glm::vec3(30.0f, 10.0f, -34.0f);
+		}
+		else {
+			if (!first) { camera.Position = lastPos; first = true; }
 		}
 		mLightsShader->use();
 
@@ -531,6 +554,15 @@ bool Update() {
 	{
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+			lastPos = camera.Position;
+		}
+
+		if (fixedCam) {
+			if (first) { lastPos = camera.Position; first = false; };
+			camera.Position = glm::vec3(1.5f, 5.0f, 15.0f);
+		}
+		else {
+			if (!first) { camera.Position = lastPos; first = true; }
 		}
 		// *************** MODELOS ESTATICOS *********************************
 		// ESCENA JINETES
@@ -912,7 +944,15 @@ bool Update() {
 	if (4 == salaActual)
 	{
 		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(0.0f, 2.0f, 0.0f); //Poner aqui la posicion fija deseada
+			camera.Position = glm::vec3(0.0f, 3.0f, 0.0f); //Poner aqui la posicion fija deseada
+			lastPos = camera.Position;
+		}
+		if (fixedCam) {
+			if (first) { lastPos = camera.Position; first = false;};
+			camera.Position = glm::vec3(1.5f, 60.0f, 50.0f);
+		}
+		else {
+			if(!first){ camera.Position = lastPos; first = true;}
 		}
 		//TEMPLO
 		{
@@ -953,12 +993,12 @@ bool Update() {
 
 		templos->Draw(*mLightsShader);
 		model = glm::mat4(1.0f);
-		teleportCamera(6.3f, -5.7f, -0.9, -5.0f, glm::vec3(0.0f, 7.5f, -11.0f));
-		teleportCamera(6.3f, -5.7f, -10, -4.9f, glm::vec3(0.0f, 2.0f, 0.0f));
-		teleportCamera(-50.0f, -61.0f, -14.0f, -17.0f, glm::vec3(-55.0f, 7.5f, -23.0f));
-		teleportCamera(-50.0f, -61.0f, -22.0f, -16.9f, glm::vec3(-55.0f, 2.0f, -12.0f));
-		teleportCamera(50.0f, 61.0f, -14.0f, -17.0f, glm::vec3(55.0f, 7.5f, -23.0f));
-		teleportCamera(50.0f, 61.0f, -22.0f, -16.9f, glm::vec3(55.0f, 2.0f, -12.0f));
+		if(teleportCamera(6.3f, -5.7f, -0.9, -5.0f, glm::vec3(0.0f, 7.5f, -11.0f))) lastPos = glm::vec3(0.0f, 9.5f, -11.0f);
+		if(teleportCamera(6.3f, -5.7f, -10, -4.9f, glm::vec3(0.0f, 3.0f, 0.0f))) lastPos = glm::vec3(0.0f, 3.0f, 0.0f);
+		if(teleportCamera(-50.0f, -61.0f, -14.0f, -17.0f, glm::vec3(-55.0f, 7.5f, -23.0f))) lastPos = glm::vec3(-55.0f, 9.5f, -23.0f);
+		if(teleportCamera(-50.0f, -61.0f, -22.0f, -16.9f, glm::vec3(-55.0f, 3.0f, -12.0f))) lastPos = glm::vec3(-55.0f, 3.0f, -12.0f);
+		if(teleportCamera(50.0f, 61.0f, -14.0f, -17.0f, glm::vec3(55.0f, 7.5f, -23.0f))) lastPos = glm::vec3(55.0f, 9.5f, -23.0f);
+		if(teleportCamera(50.0f, 61.0f, -22.0f, -16.9f, glm::vec3(55.0f, 3.0f, -12.0f))) lastPos = glm::vec3(55.0f, 3.0f, -12.0f);
 		}
 
 		//PUERTAS
@@ -974,17 +1014,17 @@ bool Update() {
 				glm::vec2(doorPosition.x, doorPosition.z)
 			);
 
-			std::cout << "Current distance to door: " << currentDistance << std::endl; // Debug
+			//std::cout << "Current distance to door: " << currentDistance << std::endl; // Debug
 
 			if (currentDistance < DOOR_ACTIVATION_DISTANCE) {
 				// Abrir progresivamente
 				door_offset = glm::min(door_offset + 2.0f * deltaTime, 5.0f);
-				std::cout << "Opening door... Current offset: " << door_offset << std::endl;
+				//std::cout << "Opening door... Current offset: " << door_offset << std::endl;
 			}
 			else if (currentDistance > DOOR_ACTIVATION_DISTANCE + 1.0f) { // Pequeño hysteresis
 				// Cerrar progresivamente
 				door_offset = glm::max(door_offset - 2.0f * deltaTime, 0.0f);
-				std::cout << "Closing door... Current offset: " << door_offset << std::endl;
+				//std::cout << "Closing door... Current offset: " << door_offset << std::endl;
 			}
 
 
@@ -1323,14 +1363,16 @@ void processInput(GLFWwindow* window)
 
 	if (chessGame.inspectMode) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-			chessGame.inspectRotation += 1.0f;
-		}
-		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			chessGame.inspectRotation -= 1.0f;
 		}
+		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+			chessGame.inspectRotation += 1.0f;
+		}
 	}
-
-
+	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+		fixedCam = true;
+	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
+		fixedCam = false;
 }
 
 
@@ -1344,6 +1386,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // glfw: Callback del movimiento y eventos del mouse
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+	if (chessGame.inspectMode && salaActual == 1)return;
 	if (firstMouse)
 	{
 		lastX = (float)xpos;
@@ -1477,10 +1520,11 @@ void limitBox(float xMax, float xMin, float zMax, float zMin) {
 //***********************************************************************************************************************
 
 //****************************************Funcion para transportar la camara segun su posicion****************************************
-void teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 newPos) {
+bool teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 newPos) {
 	if (xMin > xMax) std::swap(xMin, xMax);
 	if (zMin > zMax) std::swap(zMin, zMax);
-	if (reachBox(xMax, xMin, zMax, zMin)) camera.Position = newPos;
+	if (reachBox(xMax, xMin, zMax, zMin)) { camera.Position = newPos; return true;}
+	return false;
 }
 //************************************************************************************************************************************
 
