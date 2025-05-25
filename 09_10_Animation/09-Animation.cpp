@@ -312,7 +312,7 @@ bool Start() {
 
 	// Dibujar en malla de alambre
 	// glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-
+	CambioEscena = new Model("models/General/CambioEscena.fbx");
 
 	// Cubemap
 	vector<std::string> faces
