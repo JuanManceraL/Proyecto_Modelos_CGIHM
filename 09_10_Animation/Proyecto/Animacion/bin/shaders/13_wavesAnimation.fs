@@ -1,46 +1,42 @@
 #version 330 core
 
-#extension GL_NV_shadow_samplers_cube : enable
+in vec2 TexCoords;
+in vec3 vReflect;
+in vec3 vRefract[3];
+in float reflectionCoefficient;
 
 out vec4 FragColor;
 
-in vec2 TexCoords;
-
 uniform sampler2D texture_diffuse1;
+uniform samplerCube cubetex;
 uniform float time;
-
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-// incoming Fresnel reflection and refraction parameters
-in vec3  vReflect;
-in vec3  vRefract[3];
-in float reflectionCoefficient;
-
-// the cubemap texture
-uniform samplerCube cubetex;
-
-
 void main()
 {   
+    // Usamos texture() en lugar de textureCube() y simplificamos las coordenadas
+    vec4 reflectedColor = texture(cubetex, vReflect);
+    
+    // Refracción con canales separados
+    vec4 refractedColor;
+    refractedColor.r = texture(cubetex, vRefract[0]).r;
+    refractedColor.g = texture(cubetex, vRefract[1]).g;
+    refractedColor.b = texture(cubetex, vRefract[2]).b;
+    refractedColor.a = 1.0;
 
-    // Fresnel
-    vec4 reflectedColor = textureCube( cubetex, vec3( vReflect.x, vReflect.yz ) );
-    vec4 refractedColor = vec4( 0.0f );
+    // Animación de coordenadas de textura
+    vec2 animatedCoords = TexCoords;
+    animatedCoords.x += 0.001 * time; // Movimiento horizontal suave
 
-    refractedColor.r = textureCube( cubetex, vec3( vRefract[0].x, vRefract[0].yz ) ).r;
-    refractedColor.g = textureCube( cubetex, vec3( vRefract[1].x, vRefract[1].yz ) ).g;
-    refractedColor.b = textureCube( cubetex, vec3( vRefract[2].x, vRefract[2].yz ) ).b;
-
-    vec2 coordsT = TexCoords;
-     coordsT.x += 0.1f * (0.01)*time;
-    // coordsT.y += 0.1f * (0.01)*time;
-
-
-    vec4 fresnelColor = reflectionCoefficient * reflectedColor + (1 - reflectionCoefficient) * refractedColor;
-    vec4 texel = texture(texture_diffuse1, coordsT);
-
-    FragColor = texel*fresnelColor;
-    FragColor.a = 1.0f;
+    // Mezcla Fresnel mejorada usando mix()
+    vec4 fresnelEffect = mix(refractedColor, reflectedColor, reflectionCoefficient);
+    
+    // Textura base con animación
+    vec4 baseTexture = texture(texture_diffuse1, animatedCoords);
+    
+    // Combinación final
+    FragColor = baseTexture * fresnelEffect;
+    FragColor.a = 1.0; // Aseguramos opacidad completa
 }
