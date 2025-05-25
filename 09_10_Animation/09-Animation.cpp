@@ -128,6 +128,10 @@ AnimatedModel* character03;
 AnimatedModel* character04;
 AnimatedModel* caballo01;
 
+AnimatedModel* camelloanimado;
+AnimatedModel* cerdoanimado;
+//AnimatedModel* ovejaanimado;
+AnimatedModel* galloanimado;
 
 float tradius = 10.0f;
 float theta = 0.0f;
@@ -533,6 +537,10 @@ bool Update() {
 			lastPos = camera.Position;
 			if (!sala2Loaded) {
 				Yucatas = new Model("models/mongol/Yucatas.fbx");
+				camelloanimado = new AnimatedModel("models/animales/camelloanimado.fbx");
+				cerdoanimado = new AnimatedModel("models/animales/cerdoanimado.fbx");
+				//ovejaanimado = new AnimatedModel("models/animales/ovejaanimado.fbx");
+				galloanimado = new AnimatedModel("models/animales/galloanimado.fbx");
 				sala2Loaded = true;
 			}
 		}
@@ -544,43 +552,152 @@ bool Update() {
 		else {
 			if (!first) { camera.Position = lastPos; first = true; }
 		}
-		mLightsShader->use();
 
-		// Activamos para objetos transparentes
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		{
+			mLightsShader->use();
 
-		mLightsShader->setMat4("projection", projection);
-		mLightsShader->setMat4("view", view);
+			// Activamos para objetos transparentes
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		// Aplicamos transformaciones del modelo
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0, -8.0f)); // ¡Nuevo desplazamiento!
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-		mLightsShader->setMat4("model", model);
+			mLightsShader->setMat4("projection", projection);
+			mLightsShader->setMat4("view", view);
 
-		// Configuramos propiedades de fuentes de luz
-		mLightsShader->setInt("numLights", (int)gLights.size());
-		for (size_t i = 0; i < gLights.size(); ++i) {
-			SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
-			SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
-			SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
-			SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
-			SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
-			SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0, -8.0f)); // ¡Nuevo desplazamiento!
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+			mLightsShader->setMat4("model", model);
+
+			// Configuramos propiedades de fuentes de luz
+			mLightsShader->setInt("numLights", (int)gLights.size());
+			for (size_t i = 0; i < gLights.size(); ++i) {
+				SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+				SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+				SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+				SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+				SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+				SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+			}
+
+			mLightsShader->setVec3("eye", camera.Position);
+
+			// Aplicamos propiedades materiales
+			mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
+			mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
+			mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
+			mLightsShader->setFloat("transparency", material0.transparency);
+
+			Yucatas->Draw(*mLightsShader);
+			model = glm::mat4(1.0f);
 		}
 
-		mLightsShader->setVec3("eye", camera.Position);
+		{
+			camelloanimado->UpdateAnimation(deltaTime);
 
-		// Aplicamos propiedades materiales
-		mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
-		mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
-		mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
-		mLightsShader->setFloat("transparency", material0.transparency);
+			// Activación del shader del personaje
+			dynamicShader->use();
 
-		Yucatas->Draw(*mLightsShader);
-		model = glm::mat4(1.0f);
+			// Aplicamos transformaciones de proyección y cámara (si las hubiera)
+			dynamicShader->setMat4("projection", projection);
+			dynamicShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(1.0f, 0.0f, -10.0f)); // translate it down so it's at the center of the scene
+			model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
+
+			dynamicShader->setMat4("model", model);
+
+			dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, camelloanimado->gBones);
+
+			// Dibujamos el modelo
+			glDisable(GL_CULL_FACE); // Temporal para debug
+			camelloanimado->Draw(*dynamicShader);
+			glEnable(GL_CULL_FACE);
+		}
+
+		{
+			cerdoanimado->UpdateAnimation(deltaTime);
+
+			// Activación del shader del personaje
+			dynamicShader->use();
+
+			// Aplicamos transformaciones de proyección y cámara (si las hubiera)
+			dynamicShader->setMat4("projection", projection);
+			dynamicShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(2.0f, 0.03f, -8.0f)); // translate it down so it's at the center of the scene
+			model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
+
+			dynamicShader->setMat4("model", model);
+
+			dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, cerdoanimado->gBones);
+
+			// Dibujamos el modelo
+			glDisable(GL_CULL_FACE); // Temporal para debug
+			cerdoanimado->Draw(*dynamicShader);
+			glEnable(GL_CULL_FACE);
+		}
+
+		/* {
+			 ovejaanimado->UpdateAnimation(deltaTime);
+
+			 // Activación del shader del personaje
+			 dynamicShader->use();
+
+			 // Aplicamos transformaciones de proyección y cámara (si las hubiera)
+			 dynamicShader->setMat4("projection", projection);
+			 dynamicShader->setMat4("view", view);
+
+			 // Aplicamos transformaciones del modelo
+			 glm::mat4 model = glm::mat4(1.0f);
+			 model = glm::translate(model, position); // translate it down so it's at the center of the scene
+			 model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
+			 model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
+
+			 dynamicShader->setMat4("model", model);
+
+			 dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ovejaanimado->gBones);
+
+			 // Dibujamos el modelo
+			 glDisable(GL_CULL_FACE); // Temporal para debug
+			 ovejaanimado->Draw(*dynamicShader);
+			 glEnable(GL_CULL_FACE);
+		 }*/
+
+		{
+			galloanimado->UpdateAnimation(deltaTime);
+
+			// Activación del shader del personaje
+			dynamicShader->use();
+
+			// Aplicamos transformaciones de proyección y cámara (si las hubiera)
+			dynamicShader->setMat4("projection", projection);
+			dynamicShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(-2.0f, 0.02f, -8.0f)); // translate it down so it's at the center of the scene
+			model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
+
+			dynamicShader->setMat4("model", model);
+
+			dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, galloanimado->gBones);
+
+			// Dibujamos el modelo
+			glDisable(GL_CULL_FACE); // Temporal para debug
+			galloanimado->Draw(*dynamicShader);
+			glEnable(GL_CULL_FACE);
+		}
+
+
 		salaAntFrame = 2;
 	}
 
@@ -1174,6 +1291,8 @@ bool Update() {
 			if (!sala5Loaded) {
 				AldeaVikinga = new Model("models/vikingos/PuebloVik.fbx");
 				aguapueblo = new Model("models/vikingos/aguapueblo.fbx");
+				cerdoanimado = new AnimatedModel("models/animales/cerdoanimado.fbx");
+				galloanimado = new AnimatedModel("models/animales/galloanimado.fbx");
 				sala5Loaded = true;
 			}
 		}
@@ -1244,6 +1363,59 @@ bool Update() {
 			aguapueblo->Draw(*fresnelShader);
 
 		}
+
+		{
+			galloanimado->UpdateAnimation(deltaTime);
+
+			// Activación del shader del personaje
+			dynamicShader->use();
+
+			// Aplicamos transformaciones de proyección y cámara (si las hubiera)
+			dynamicShader->setMat4("projection", projection);
+			dynamicShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(-2.0f, 0.02f, -8.0f)); // translate it down so it's at the center of the scene
+			model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
+
+			dynamicShader->setMat4("model", model);
+
+			dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, galloanimado->gBones);
+
+			// Dibujamos el modelo
+			glDisable(GL_CULL_FACE); // Temporal para debug
+			galloanimado->Draw(*dynamicShader);
+			glEnable(GL_CULL_FACE);
+		}
+
+		{
+			cerdoanimado->UpdateAnimation(deltaTime);
+
+			// Activación del shader del personaje
+			dynamicShader->use();
+
+			// Aplicamos transformaciones de proyección y cámara (si las hubiera)
+			dynamicShader->setMat4("projection", projection);
+			dynamicShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(34.0f, 0.00f, -43.0f)); // translate it down so it's at the center of the scene
+			model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.008f, 0.008f, 0.008f));	// it's a bit too big for our scene, so scale it down
+
+			dynamicShader->setMat4("model", model);
+
+			dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, cerdoanimado->gBones);
+
+			// Dibujamos el modelo
+			glDisable(GL_CULL_FACE); // Temporal para debug
+			cerdoanimado->Draw(*dynamicShader);
+			glEnable(GL_CULL_FACE);
+		}
+
 
 		glUseProgram(0);
 		salaAntFrame = 5;
