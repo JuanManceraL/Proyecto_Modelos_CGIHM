@@ -57,6 +57,8 @@ bool reachBox(float xMax, float xMin, float zMax, float zMin);
 bool isPlayerNearDoor(const glm::vec3& playerPosition, const glm::vec3& doorPosition, float threshold);
 
 
+void cambio_escena();
+
 // Gobals
 GLFWwindow* window;
 
@@ -87,6 +89,9 @@ float     rotateCharacter = 0.0f;
 float	  door_offset = 0.0f;
 float	  door_rotation = 0.0f;
 
+float	  alturaTransEs = -3.0f;
+bool	  cambiandoEscena = false;
+
 // Shaders
 Shader* mLightsShader;
 Shader* proceduralShader;
@@ -114,6 +119,7 @@ Model* EmbarcacionVik;
 Model* aguaembarcacion;
 Model* aguapueblo_2;
 
+Model* CambioEscena;
 
 // Modelos animados
 AnimatedModel* character01;
@@ -150,6 +156,7 @@ float wavesTime = 0.0f;
 
 //Salas
 int salaActual = 1;
+int siguienteSala = 0;
 int salaAntFrame = 1;
 
 //Camara fija
@@ -298,7 +305,7 @@ bool Start() {
 	wavesShader = new Shader("shaders/13_wavesAnimation.vs", "shaders/13_wavesAnimation.fs");
 	cubemapShader = new Shader("shaders/10_vertex_cubemap.vs", "shaders/10_fragment_cubemap.fs");
 	dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
-	fresnelShader = new Shader("shaders/11_fresnel.vs", "shaders/11_fresnel.fs");
+	fresnelShader = new Shader("shaders/11_Fresnel.vs", "shaders/11_Fresnel.fs");
 
 	// Máximo número de huesos: 100
 	dynamicShader->setBonesIDs(MAX_RIGGING_BONES);
@@ -405,6 +412,9 @@ bool Update() {
 
 	glfwGetCursorPos(window, &xpos, &ypos);
 	posMouse = ScreenToWorld(xpos, ypos, projection, view, 0.2f);
+
+	// Hace las transiciones cuando son necesarias
+	cambio_escena();
 
 	if (1 == salaActual)
 	{
@@ -1284,7 +1294,50 @@ bool Update() {
 		salaAntFrame = 6;
 	}
 
- 
+	// Transicion de escena
+	{
+		{
+			mLightsShader->use();
+
+			// Activamos para objetos transparentes
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			mLightsShader->setMat4("projection", projection);
+			mLightsShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(camera.Position.x, alturaTransEs, camera.Position.z)); // ¡Nuevo desplazamiento!
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+			mLightsShader->setMat4("model", model);
+
+			// Configuramos propiedades de fuentes de luz
+			mLightsShader->setInt("numLights", (int)gLights.size());
+			for (size_t i = 0; i < gLights.size(); ++i) {
+				SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+				SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+				SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+				SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+				SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+				SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+			}
+
+			mLightsShader->setVec3("eye", camera.Position);
+
+			// Aplicamos propiedades materiales
+			mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
+			mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
+			mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
+			mLightsShader->setFloat("transparency", material0.transparency);
+
+			CambioEscena->Draw(*mLightsShader);
+			model = glm::mat4(1.0f);
+		}
+	}
+
+
 	// glfw: swap buffers 
 	glfwSwapBuffers(window);
 	glfwPollEvents();
@@ -1315,17 +1368,35 @@ void processInput(GLFWwindow* window)
 
 
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-		salaActual = 1;
+	{
+		cambiandoEscena = true;
+		siguienteSala = 1;
+	}
 	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-		salaActual = 2;
+	{
+		cambiandoEscena = true;
+		siguienteSala = 2;
+	}
 	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-		salaActual = 3;
+	{
+		cambiandoEscena = true;
+		siguienteSala = 3;
+	}
 	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
-		salaActual = 4;
+	{
+		cambiandoEscena = true;
+		siguienteSala = 4;
+	}
 	if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
-		salaActual = 5;
+	{
+		cambiandoEscena = true;
+		siguienteSala = 5;
+	}
 	if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
-		salaActual = 6;
+	{
+		cambiandoEscena = true;
+		siguienteSala = 6;
+	}
 
 
 	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
@@ -1384,6 +1455,29 @@ void processInput(GLFWwindow* window)
 		fixedCam = true;
 	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
 		fixedCam = false;
+}
+
+void cambio_escena()
+{
+	if (cambiandoEscena)
+	{
+		if (alturaTransEs < 0.3)
+		{
+			alturaTransEs += 0.003f;
+		}
+		else
+		{
+			salaActual = siguienteSala;
+			cambiandoEscena = false;
+		}
+	}
+	else
+	{
+		if (alturaTransEs > -3.0f)
+		{
+			alturaTransEs -= 0.003f;
+		}
+	}
 }
 
 
