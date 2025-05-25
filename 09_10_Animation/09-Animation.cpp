@@ -53,8 +53,9 @@ glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void limitBox(float xMax, float xMin, float zMax, float zMin);
 bool teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 newPos);
-
 bool reachBox(float xMax, float xMin, float zMax, float zMin);
+bool isPlayerNearDoor(const glm::vec3& playerPosition, const glm::vec3& doorPosition, float threshold);
+
 
 // Gobals
 GLFWwindow* window;
@@ -254,17 +255,7 @@ int main()
 
 }
 
-//SENSOR PARA LA PEURTA
-bool isPlayerNearDoor(const glm::vec3& playerPosition, const glm::vec3& doorPosition, float threshold) {
-	// Ignora la coordenada Y para comparación solo en plano XZ
-	glm::vec2 playerXZ(playerPosition.x, playerPosition.z);
-	glm::vec2 doorXZ(doorPosition.x, doorPosition.z);
-	float distance = glm::distance(playerXZ, doorXZ);
 
-	std::cout << "Calculated 2D distance: " << distance << std::endl; // Debug
-
-	return distance < threshold;
-}
 
 bool Start() {
 	// Inicialización de GLFW
@@ -481,16 +472,16 @@ bool Update() {
 		salaAntFrame = 1;
 	}
 
-	if (2 == salaActual)
+	else if (2 == salaActual)
 	{
-		if (!sala2Loaded) {
-			Yucatas = new Model("models/mongol/Yucatas.fbx");
-			sala2Loaded = true;
-		}
 
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
 			lastPos = camera.Position;
+			if (!sala2Loaded) {
+				Yucatas = new Model("models/mongol/Yucatas.fbx");
+				sala2Loaded = true;
+			}
 		}
 
 		if (fixedCam) {
@@ -540,22 +531,22 @@ bool Update() {
 		salaAntFrame = 2;
 	}
 
-	if (3 == salaActual)
+	else if (3 == salaActual)
 	{
-		if (!sala3Loaded) {
-			character02 = new AnimatedModel("models/mongol/jinete_espada.fbx");
-			character03 = new AnimatedModel("models/mongol/jinete_tug.fbx");
-			character04 = new AnimatedModel("models/mongol/jinete_solo.fbx");
-			caballo01 = new AnimatedModel("models/mongol/caballo1.fbx");
-			character01 = new AnimatedModel("models/mongol/jinete_arquero.fbx");
-			llanura_irregular = new Model("models/mongol/llanura_irregular.obj");
-			monte = new Model("models/mongol/montes.fbx");
-			terrenos = new Model("models/mongol/Terrenos.fbx");
-			sala3Loaded = true;
-		}
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
 			lastPos = camera.Position;
+			if (!sala3Loaded) {
+				character02 = new AnimatedModel("models/mongol/jinete_espada.fbx");
+				character03 = new AnimatedModel("models/mongol/jinete_tug.fbx");
+				character04 = new AnimatedModel("models/mongol/jinete_solo.fbx");
+				caballo01 = new AnimatedModel("models/mongol/caballo1.fbx");
+				character01 = new AnimatedModel("models/mongol/jinete_arquero.fbx");
+				llanura_irregular = new Model("models/mongol/llanura_irregular.obj");
+				monte = new Model("models/mongol/montes.fbx");
+				terrenos = new Model("models/mongol/Terrenos.fbx");
+				sala3Loaded = true;
+			}
 		}
 
 		if (fixedCam) {
@@ -942,18 +933,18 @@ bool Update() {
 		salaAntFrame = 3;
 	}
 
-	if (4 == salaActual)
+	else if (4 == salaActual)
 	{
-		if (!sala4Loaded) {
-			templos = new Model("models/mongol/ESCENAS/AreaTemplos.fbx");
-			// Puertas de templos
-			puerta1 = new Model("models/mongol/ESCENAS/puerta1.fbx");
-			puerta2 = new Model("models/mongol/ESCENAS/puerta2.fbx");
-			sala4Loaded = true;
-		}
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(0.0f, 3.0f, 0.0f); //Poner aqui la posicion fija deseada
 			lastPos = camera.Position;
+			if (!sala4Loaded) {
+				templos = new Model("models/mongol/ESCENAS/AreaTemplos.fbx");
+				// Puertas de templos
+				puerta1 = new Model("models/mongol/ESCENAS/puerta1.fbx");
+				puerta2 = new Model("models/mongol/ESCENAS/puerta2.fbx");
+				sala4Loaded = true;
+			}
 		}
 		if (fixedCam) {
 			if (first) { lastPos = camera.Position; first = false;};
@@ -1122,15 +1113,16 @@ bool Update() {
 		salaAntFrame = 4;
 	}
 
-	if (5 == salaActual)
+	else if (5 == salaActual)
 	{
-		if (!sala5Loaded) {
-			AldeaVikinga = new Model("models/vikingos/PuebloVik.fbx");
-			aguapueblo = new Model("models/vikingos/aguapueblo.fbx");
-			sala5Loaded = true;
-		}
+
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+			if (!sala5Loaded) {
+				AldeaVikinga = new Model("models/vikingos/PuebloVik.fbx");
+				aguapueblo = new Model("models/vikingos/aguapueblo.fbx");
+				sala5Loaded = true;
+			}
 		}
 		{
 			mLightsShader->use();
@@ -1204,16 +1196,16 @@ bool Update() {
 		salaAntFrame = 5;
 	}
 
-	if (6 == salaActual)
+	else if (6 == salaActual)
 	{
-		if (!sala6Loaded) {
-			EmbarcacionVik = new Model("models/vikingos/embarcacion.fbx");
-			aguaembarcacion = new Model("models/vikingos/agua_embarcacion.fbx");
-			sala6Loaded = true;
-		}
 
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+			if (!sala6Loaded) {
+				EmbarcacionVik = new Model("models/vikingos/embarcacion.fbx");
+				aguaembarcacion = new Model("models/vikingos/agua_embarcacion.fbx");
+				sala6Loaded = true;
+			}
 		}
 
 		{
@@ -1555,3 +1547,15 @@ bool reachBox(float xMax, float xMin, float zMax, float zMin) {
 	return false;
 }
 //***********************************************************************************************************************************************************
+
+//SENSOR PARA LA PEURTA
+bool isPlayerNearDoor(const glm::vec3& playerPosition, const glm::vec3& doorPosition, float threshold) {
+	// Ignora la coordenada Y para comparación solo en plano XZ
+	glm::vec2 playerXZ(playerPosition.x, playerPosition.z);
+	glm::vec2 doorXZ(doorPosition.x, doorPosition.z);
+	float distance = glm::distance(playerXZ, doorXZ);
+
+	std::cout << "Calculated 2D distance: " << distance << std::endl; // Debug
+
+	return distance < threshold;
+}
