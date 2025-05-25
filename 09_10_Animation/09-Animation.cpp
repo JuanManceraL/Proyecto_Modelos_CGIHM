@@ -183,6 +183,9 @@ bool sala4Loaded = false;
 bool sala5Loaded = false;
 bool sala6Loaded = false;
 
+Mesh* cursorMesh = nullptr;
+Shader* cursorShader = nullptr;
+
 // Entrada a función principal
 int main()
 {
@@ -287,7 +290,9 @@ bool Start() {
 	glfwSetMouseButtonCallback(window, MouseButtonCallback);
 
 	// Ocultar el cursor mientras se rota la escena
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPos(window, SCR_WIDTH / 2.0, SCR_HEIGHT / 2.0);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 
 	// glad: Cargar todos los apuntadores
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -306,6 +311,7 @@ bool Start() {
 	cubemapShader = new Shader("shaders/10_vertex_cubemap.vs", "shaders/10_fragment_cubemap.fs");
 	dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
 	fresnelShader = new Shader("shaders/11_Fresnel.vs", "shaders/11_Fresnel.fs");
+	cursorShader = new Shader("shaders/01_cursor.vs", "shaders/01_cursor.fs");
 
 	// Máximo número de huesos: 100
 	dynamicShader->setBonesIDs(MAX_RIGGING_BONES);
@@ -338,6 +344,22 @@ bool Start() {
 	light01.Position = glm::vec3(0.0f, 9.0f, 0.0f);
 	light01.Color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 	gLights.push_back(light01);
+
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices = { 0, 1, 2, 2, 3, 0 };
+
+
+	float size = 0.01f;
+	glm::vec2 square[] = {
+		{-size, -size}, {size, -size}, {size, size}, {-size, size}
+	};
+
+	for (int i = 0; i < 4; ++i) {
+		Vertex v = {};
+		v.Position = glm::vec3(square[i], 0.0f);
+		vertices.push_back(v);
+	}
+	cursorMesh = new Mesh(vertices, indices, {});
 
 	return true;
 }
@@ -479,6 +501,27 @@ bool Update() {
 
 		salaInicial->Draw(*mLightsShader);
 		RenderChess(mLightsShader, model);
+		{
+			// Obtener posición del mouse
+			double mouseX, mouseY;
+			glfwGetCursorPos(window, &mouseX, &mouseY);
+			int width, height;
+			glfwGetWindowSize(window, &width, &height);
+
+			float xNDC = (float(mouseX) / width) * 2.0f - 1.0f;
+			float yNDC = 1.0f - (float(mouseY) / height) * 2.0f;
+
+			glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(xNDC, yNDC, 0.0f));
+
+			cursorShader->use();
+			cursorShader->setMat4("projection", glm::mat4(1.0f));
+			cursorShader->setMat4("view", glm::mat4(1.0f));
+			cursorShader->setMat4("model", model);
+
+			glDisable(GL_DEPTH_TEST); // Asegura que se vea por encima
+			cursorMesh->Draw(*cursorShader);
+			glEnable(GL_DEPTH_TEST);
+		}
 		salaAntFrame = 1;
 	}
 
