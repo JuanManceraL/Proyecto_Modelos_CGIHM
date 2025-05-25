@@ -318,7 +318,6 @@ bool Start() {
 	Yucatas = new Model("models/mongol/Yucatas.fbx");
 	EmbarcacionVik = new Model("models/vikingos/embarcacion.fbx");
 	aguaembarcacion = new Model("models/vikingos/agua_embarcacion.fbx");
-	aguapueblo_2 = new Model("models/vikingos/embarcacion.fbx");
 
 	gridMesh = new Model("models/IllumModels/grid.fbx");
 

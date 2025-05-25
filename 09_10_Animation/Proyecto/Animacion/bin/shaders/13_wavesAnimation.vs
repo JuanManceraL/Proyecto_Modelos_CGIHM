@@ -41,8 +41,8 @@ void main()
 
     gl_Position = projection * view * model * PosL;  
 
-    PosL.z += 0.5f * sin(PosL.x + (0.06)*time);
-    PosL.z += 0.5f * sin(PosL.y + (0.06)*time);
+    PosL.z += 0.45f * sin(PosL.x + (0.006)*time);
+    PosL.z += 0.45f * sin(PosL.y + (0.006)*time);
 
     gl_Position = projection * view * model * PosL;
 
