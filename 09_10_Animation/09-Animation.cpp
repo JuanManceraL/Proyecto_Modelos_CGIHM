@@ -55,6 +55,9 @@ void limitBox(float xMax, float xMin, float zMax, float zMin);
 bool teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 newPos);
 bool reachBox(float xMax, float xMin, float zMax, float zMin);
 
+void cambioSonido(ISound*& currentSong, const char* filePath, bool loop);
+void siguiente_narracion(bool reinicio);
+void trigger_audio();
 
 void cambio_escena();
 
@@ -161,15 +164,25 @@ float wavesTime = 0.0f;
 int salaActual = 1;
 int siguienteSala = 0;
 int salaAntFrame = 1;
+int momento = 0;
 
 //Camara fija
 bool fixedCam = false;
 glm::vec3 lastPos(0.0f, 2.0f, 0.0f);
 bool first = false;
 
-// Audio
+// Sonido
 ISoundEngine* SoundEngine = createIrrKlangDevice();
+ISound* backgroundMusic = nullptr;
+ISound* sfx = nullptr;
+ISound* narracion = nullptr;
+string narraciones_path[6][5];
+string sfx_path[6];
+string background_path[6];
+// Trigger narracion
+glm::vec2 tr_A1_M1(5.0f, 5.0f);
 
+// Trigger sfx
 // selección de cámara
 bool    activeCamera = 1; // activamos la primera cámara
 //********************************Variables globales para inicializar el juego y obtener posiciones********************************
@@ -364,6 +377,26 @@ bool Start() {
 	}
 	cursorMesh = new Mesh(vertices, indices, {});
 
+	//Rutas archivos musica
+/*
+	string narraciones_path[6][5];
+	string sfx_path[6];
+	string background_path[5];
+*/
+	narraciones_path[0][0] = "sound/narracion/SalaInicial_Intro.mp3";
+	narraciones_path[1][0] = "sound/narracion/Es1_A1.mp3";
+	narraciones_path[1][1] = "sound/narracion/Es1_A2.mp3";
+	narraciones_path[2][0] = "sound/narracion/Es2_A1.mp3";
+
+	sfx_path[0] = "sound/sfx/Forge.wav";
+
+	background_path[0] = "sound/background/ambientNature.mp3";
+	background_path[1] = "sound/background/ambientNature.mp3";
+	background_path[2] = "sound/background/ambientNature.mp3";
+	background_path[3] = "sound/background/ambientNature.mp3";
+	background_path[4] = "sound/background/ambientNature.mp3";
+	background_path[5] = "sound/background/ambientNature.mp3";
+
 	return true;
 }
 
@@ -440,6 +473,7 @@ bool Update() {
 
 	// Hace las transiciones cuando son necesarias
 	cambio_escena();
+	trigger_audio();
 
 	if (1 == salaActual)
 	{
@@ -1580,6 +1614,17 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 
+	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+	{
+		if (momento == 0)
+		{
+			siguiente_narracion(true);
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+		std::cout << "Ubicacion - (" << camera.Position.x << "," << camera.Position.z << ")" << std::endl;
+
 
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
 	{
@@ -1612,7 +1657,7 @@ void processInput(GLFWwindow* window)
 		siguienteSala = 6;
 	}
 
-
+	/*
 	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
 		door_offset += 0.01f;
 		// Limitar máximo 
@@ -1631,6 +1676,7 @@ void processInput(GLFWwindow* window)
 		door_rotation += 1.f;
 	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
 		door_rotation -= 1.f;
+	*/
 
 	// Character movement
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
@@ -1682,6 +1728,8 @@ void cambio_escena()
 		else
 		{
 			salaActual = siguienteSala;
+			cambioSonido(backgroundMusic, background_path[salaActual - 1].c_str(), true);
+			momento = 0;
 			cambiandoEscena = false;
 		}
 	}
@@ -1694,6 +1742,68 @@ void cambio_escena()
 	}
 }
 
+void cambioSonido(ISound*& currentSong, const char* filePath, bool loop = false)
+{
+	if (currentSong)
+	{
+		currentSong->stop();
+		currentSong->drop();
+	}
+	currentSong = SoundEngine->play2D(filePath, loop, false, true);
+}
+
+
+void siguiente_narracion(bool reinicio = false)
+{
+	std::cout << "Reproduciendo audio Area: " << salaActual - 1 << "  -   Momento: " << momento << std::endl;
+	cambioSonido(narracion, narraciones_path[salaActual - 1][momento].c_str());
+	momento++;
+	/*
+	if (true)
+	{
+		cambioSonido(narracion, narraciones_path[salaActual-1][0].c_str());
+		momento++;
+	}
+	else
+	{
+		cambioSonido(narracion, narraciones_path[salaActual-1][momento].c_str());
+		momento++;
+	}
+	*/
+}
+
+void trigger_audio()
+{
+	// Narraciones
+	{
+		float tar_pos_x = 100;
+		float tar_pos_y = 100;
+		int r = 1;
+		if (salaActual == 2)
+		{
+			//std::cout << "Dist = " << sqrt((pow(camera.Position.x - tr_A1_M1.x, 2)) + (camera.Position.z - tr_A1_M1.y, 2)) << "----" << "(" << camera.Position.x << "," << camera.Position.z << ")" << std::endl;
+			// Parametros x, y, r
+			switch (momento)
+			{
+			case 1:
+				tar_pos_x = tr_A1_M1.x;
+				tar_pos_y = tr_A1_M1.y;
+				r = 3;
+				break;
+			default:
+				break;
+			}
+
+			float d = sqrt((pow(camera.Position.x - tar_pos_x, 2)) + (camera.Position.z - tar_pos_y, 2));
+
+			if (d <= r)
+			{
+				siguiente_narracion();
+			}
+		}
+
+	}
+}
 
 // glfw: Actualizamos el puerto de vista si hay cambios del tamaño
 // de la ventana

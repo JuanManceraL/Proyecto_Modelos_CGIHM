@@ -1,6 +1,6 @@
 #version 330 core
 
-#extension GL_NV_shadow_samplers_cube : enable
+//#extension GL_NV_shadow_samplers_cube : enable
 
 // Adaptation for OpenGL/GLSL by: PhD Sergio Teodoro-Vite
 // Based on: The CG Tutorial, Nvidia developer zone
