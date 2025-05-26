@@ -1,6 +1,6 @@
 #version 330 core
 
-//#extension GL_NV_shadow_samplers_cube : enable
+#extension GL_NV_shadow_samplers_cube : enable
 
 // Adaptation for OpenGL/GLSL by: PhD Sergio Teodoro-Vite
 // Based on: The CG Tutorial, Nvidia developer zone
@@ -38,6 +38,6 @@ void main(void)
 	vec4 fresnelColor = reflectionCoefficient * reflectedColor + (1 - reflectionCoefficient) * refractedColor;
 	vec4 texel = texture(texture_diffuse1, TexCoords);
 
-	FragColor = fresnelColor*texel;
+	FragColor = fresnelColor;
 	FragColor.a = 1.0f;
 }

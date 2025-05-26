@@ -249,7 +249,7 @@ int main()
 	material6.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 	material6.diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
 	material6.specular = glm::vec4(0.9f, 0.9f, 0.9f, 1.0f);
-	material6.transparency = 0.8f;
+	material6.transparency = 0.6f;
 
 	//PLASTICOS
 	// Material 7 - Plastico blanco
@@ -1337,30 +1337,43 @@ bool Update() {
 		}
 
 		{
-			// Activamos el shader de Phong
-			fresnelShader->use();
+			mLightsShader->use();
 
 			// Activamos para objetos transparentes
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			// Aplicamos transformaciones de proyección y cámara (si las hubiera)
-			fresnelShader->setMat4("projection", projection);
-			fresnelShader->setMat4("view", view);
+			mLightsShader->setMat4("projection", projection);
+			mLightsShader->setMat4("view", view);
 
 			// Aplicamos transformaciones del modelo
 			glm::mat4 model = glm::mat4(1.0f);
-
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, -7.5f));
+			model = glm::translate(model, glm::vec3(0.0f, 0.0, -8.0f)); // ¡Nuevo desplazamiento!
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-			fresnelShader->setMat4("model", model);
-			fresnelShader->setVec3("cameraPosition", camera.Position);
-			fresnelShader->setFloat("mRefractionRatio", 1.0f / 1.333f); // 1.333 Agua
-			fresnelShader->setFloat("_Bias", 0.2f);
-			fresnelShader->setFloat("_Scale", 0.5f);
-			fresnelShader->setFloat("_Power", 0.5f);
-			aguapueblo->Draw(*fresnelShader);
+			mLightsShader->setMat4("model", model);
+
+			// Configuramos propiedades de fuentes de luz
+			mLightsShader->setInt("numLights", (int)gLights.size());
+			for (size_t i = 0; i < gLights.size(); ++i) {
+				SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+				SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+				SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+				SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+				SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+				SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+			}
+
+			mLightsShader->setVec3("eye", camera.Position);
+
+			// Aplicamos propiedades materiales
+			mLightsShader->setVec4("MaterialAmbientColor", material6.ambient);
+			mLightsShader->setVec4("MaterialDiffuseColor", material6.diffuse);
+			mLightsShader->setVec4("MaterialSpecularColor", material6.specular);
+			mLightsShader->setFloat("transparency", material6.transparency);
+
+			aguapueblo->Draw(*mLightsShader);
+			model = glm::mat4(1.0f);
 
 		}
 
