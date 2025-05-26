@@ -1349,6 +1349,7 @@ bool Update() {
 
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(-8.0f, 2.0f, -25.0f); //Poner aqui la posicion fija deseada
+			lastPos = camera.Position;
 			if (!sala5Loaded) {
 				AldeaVikinga = new Model("models/vikingos/PuebloVik.fbx");
 				aguapueblo = new Model("models/vikingos/aguapueblo.fbx");
@@ -1356,6 +1357,13 @@ bool Update() {
 				galloanimado = new AnimatedModel("models/animales/galloanimado.fbx");
 				sala5Loaded = true;
 			}
+		}
+		if (fixedCam) {
+			if (first) { lastPos = camera.Position; first = false; };
+			camera.Position = glm::vec3(1.5f, 30.0f, 50.0f);
+		}
+		else {
+			if (!first) { camera.Position = lastPos; first = true; }
 		}
 		{
 			mLightsShader->use();
@@ -1500,13 +1508,20 @@ bool Update() {
 
 		if (salaActual != salaAntFrame) {
 			camera.Position = glm::vec3(4.0f, 2.0f, -8.0f); //Poner aqui la posicion fija deseada
+			lastPos = camera.Position;
 			if (!sala6Loaded) {
 				EmbarcacionVik = new Model("models/vikingos/embarcacion.fbx");
 				aguaembarcacion = new Model("models/vikingos/agua_embarcacion.fbx");
 				sala6Loaded = true;
 			}
 		}
-
+		if (fixedCam) {
+			if (first) { lastPos = camera.Position; first = false; };
+			camera.Position = glm::vec3(1.5f, 30.0f, 50.0f);
+		}
+		else {
+			if (!first) { camera.Position = lastPos; first = true; }
+		}
 		{
 			mLightsShader->use();
 
