@@ -125,6 +125,7 @@ Model* salaInicial;
 Model* AldeaVikinga;
 Model* aguapueblo;
 Model* Yucatas;
+Model* MongolCivil;
 Model* EmbarcacionVik;
 Model* aguaembarcacion;
 Model* aguapueblo_2;
@@ -185,28 +186,33 @@ ISoundEngine* SoundEngine = createIrrKlangDevice();
 ISound* backgroundMusic = nullptr;
 ISound* sfx = nullptr;
 ISound* narracion = nullptr;
-string narraciones_path[6][5];
+string narraciones_path[6][7];
 string sfx_path[6];
 string background_path[6];
 // Trigger narracion
 glm::vec2 tr_A0_M1(-6.0f, 0.0f);
+// Yucatas
 glm::vec2 tr_A1_M0(0.0f, -5.0f);
-glm::vec2 tr_A1_M1(15.0f, 14.0f);
+glm::vec2 tr_A1_M1(15.0f, -15.0f);
 glm::vec2 tr_A1_M2(-4.0f, -1.0f);
 glm::vec2 tr_A1_M3(0.0f, 6.0f);
-glm::vec2 tr_A2_M0(8.0f, 1.0f);
-glm::vec2 tr_A2_M1(6.0f, 6.0f);
-glm::vec2 tr_A2_M2(0.0f, 6.0f);
+// Jinetes
+glm::vec2 tr_A2_M0(6.0f, 6.0f);
+glm::vec2 tr_A2_M1(0.0f, 6.0f);
+// Templo
 glm::vec2 tr_A3_M0(0.0f, 42.0f);
 glm::vec2 tr_A3_M1(0.0f, -34.0f);
 glm::vec2 tr_A3_M2(0.0f, 14.0f);
-glm::vec2 tr_A4_M0(-7.0f, -35.0f);
-glm::vec2 tr_A4_M1(21.0f, -31.0f);
-glm::vec2 tr_A4_M2(42.0f, -41.0f);
-glm::vec2 tr_A4_M3(36.0f, 7.0f);
-glm::vec2 tr_A4_M4(-10.0f, 10.0f);
-glm::vec2 tr_A4_M5(-20.0f, -5.0f);
-glm::vec2 tr_A4_M6(-31.0f, -7.0f);
+// Pueblo Vikingo
+glm::vec2 tr_A4_M0(4.0f, -24.0f);
+glm::vec2 tr_A4_M1(-7.0f, -35.0f);
+glm::vec2 tr_A4_M2(21.0f, -31.0f);
+glm::vec2 tr_A4_M3(42.0f, -41.0f);
+glm::vec2 tr_A4_M4(36.0f, 7.0f);
+glm::vec2 tr_A4_M5(-10.0f, 10.0f);
+glm::vec2 tr_A4_M6(-20.0f, -5.0f);
+glm::vec2 tr_A4_M7(-31.0f, -7.0f);
+// Embarcacion
 glm::vec2 tr_A5_M0(-2.0f, -8.0f);
 glm::vec3 tarPos;
 
@@ -420,6 +426,14 @@ bool Start() {
 	narraciones_path[2][0] = "sound/narracion/Es2_A1.mp3";
 	narraciones_path[3][0] = "sound/narracion/Es3_A1.mp3";
 	narraciones_path[3][1] = "sound/narracion/Es3_A2.mp3";
+	narraciones_path[4][0] = "sound/narracion/Es4_A1.mp3";
+	narraciones_path[4][1] = "sound/narracion/Es4_A2.mp3";
+	narraciones_path[4][2] = "sound/narracion/Es4_A3.mp3";
+	narraciones_path[4][3] = "sound/narracion/Es4_A4.mp3";
+	narraciones_path[4][4] = "sound/narracion/Es4_A5.mp3";
+	narraciones_path[4][5] = "sound/narracion/Es4_A6.mp3";
+	narraciones_path[4][6] = "sound/narracion/Es4_A7.mp3";
+	narraciones_path[5][0] = "sound/narracion/Es5_A0.mp3";
 
 	sfx_path[0] = "sound/sfx/Forge.wav";
 
@@ -528,7 +542,7 @@ bool Update() {
 		}
 
 		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(4.0f, 2.0f, 0.0f);
+			camera.Position = glm::vec3(4.0f, 2.0f, 0.0f);	// AYUDA
 			lastPos = camera.Position;
 		}
 		if (chessGame.inspectMode) {
@@ -614,6 +628,7 @@ bool Update() {
 			lastPos = camera.Position;
 			if (!sala2Loaded) {
 				Yucatas = new Model("models/mongol/Yucatas.fbx");
+				MongolCivil = new Model("models/mongol/Guitarra.fbx");
 				camelloanimado = new AnimatedModel("models/animales/camelloanimado.fbx");
 				cerdoanimado = new AnimatedModel("models/animales/cerdoanimado.fbx");
 				//ovejaanimado = new AnimatedModel("models/animales/ovejaanimado.fbx");
@@ -667,6 +682,7 @@ bool Update() {
 			mLightsShader->setFloat("transparency", material0.transparency);
 
 			Yucatas->Draw(*mLightsShader);
+			MongolCivil->Draw(*mLightsShader);
 			model = glm::mat4(1.0f);
 		}
 
@@ -1546,7 +1562,7 @@ bool Update() {
 				model = glm::mat4(1.0f);
 				model = glm::translate(model, p_i.position);
 				model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación para mirar a la cámara
-				model = glm::scale(model, glm::vec3(0.1f)); // Escala
+				model = glm::scale(model, glm::vec3(0.05f)); // Escala
 
 				particlesShader->setMat4("model", model);
 
@@ -1646,7 +1662,7 @@ bool Update() {
 			wavesShader->setFloat("height", 1.0f);
 
 			aguaembarcacion->Draw(*wavesShader);
-			wavesTime += 0.01;
+			wavesTime += 0.005;
 
 		}
 
@@ -1962,25 +1978,19 @@ void trigger_audio()
 				tar_pos_y = tr_A1_M3.y;
 				cambiarEscena = true;
 				break;
-			default:
-				break;
 			}
+			break;
 		//Jinetes
 		case 3:
 			if (momento == 0)
 			{
-					tar_pos_x = tr_A2_M0.x;
-					tar_pos_y = tr_A2_M0.y;
-			}
-			else if (momento == 1)
-			{
-				tar_pos_x = tr_A2_M1.x;
-				tar_pos_y = tr_A2_M1.y;
+				tar_pos_x = tr_A2_M0.x;
+				tar_pos_y = tr_A2_M0.y;
 			}
 			else
 			{
-				tar_pos_x = tr_A2_M2.x;
-				tar_pos_y = tr_A2_M2.y;
+				tar_pos_x = tr_A2_M1.x;
+				tar_pos_y = tr_A2_M1.y;
 				cambiarEscena = true;
 			}
 			break;
@@ -1990,6 +2000,7 @@ void trigger_audio()
 			{
 				tar_pos_x = tr_A3_M0.x;
 				tar_pos_y = tr_A3_M0.y;
+				tar_pos_y_real = 0.5f;
 			}
 			else if (momento == 1)
 			{
@@ -2001,6 +2012,7 @@ void trigger_audio()
 			{
 				tar_pos_x = tr_A3_M2.x;
 				tar_pos_y = tr_A3_M2.y;
+				tar_pos_y_real = 0.5f;
 				cambiarEscena = true;
 			}
 			break;
@@ -2035,9 +2047,11 @@ void trigger_audio()
 			case 6:
 				tar_pos_x = tr_A4_M6.x;
 				tar_pos_y = tr_A4_M6.y;
-				cambiarEscena = true;
 				break;
-			default:
+			case 7:
+				tar_pos_x = tr_A4_M7.x;
+				tar_pos_y = tr_A4_M7.y;
+				cambiarEscena = true;
 				break;
 			}
 			break;
