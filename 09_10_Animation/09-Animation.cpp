@@ -32,6 +32,7 @@
 #include <irrKlang.h>
 using namespace irrklang;
 #include "ChessGame.h"
+#include "particles.h"
 
 float floorOffsetZ = 0.0f; // Variable para el desplazamiento del piso
 float floorSpeed = 1.0f;   // Velocidad del movimiento (ajústala según necesites)
