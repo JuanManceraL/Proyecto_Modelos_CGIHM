@@ -54,7 +54,6 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void limitBox(float xMax, float xMin, float zMax, float zMin);
 bool teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 newPos);
 bool reachBox(float xMax, float xMin, float zMax, float zMin);
-bool isPlayerNearDoor(const glm::vec3& playerPosition, const glm::vec3& doorPosition, float threshold);
 
 
 void cambio_escena();
@@ -1856,15 +1855,3 @@ bool reachBox(float xMax, float xMin, float zMax, float zMin) {
 	return false;
 }
 //***********************************************************************************************************************************************************
-
-//SENSOR PARA LA PEURTA
-bool isPlayerNearDoor(const glm::vec3& playerPosition, const glm::vec3& doorPosition, float threshold) {
-	// Ignora la coordenada Y para comparación solo en plano XZ
-	glm::vec2 playerXZ(playerPosition.x, playerPosition.z);
-	glm::vec2 doorXZ(doorPosition.x, doorPosition.z);
-	float distance = glm::distance(playerXZ, doorXZ);
-
-	std::cout << "Calculated 2D distance: " << distance << std::endl; // Debug
-
-	return distance < threshold;
-}
