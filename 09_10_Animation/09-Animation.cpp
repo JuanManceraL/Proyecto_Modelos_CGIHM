@@ -334,8 +334,8 @@ bool Start() {
 	glfwSetMouseButtonCallback(window, MouseButtonCallback);
 
 	// Ocultar el cursor mientras se rota la escena
-	//glfwSetCursorPos(window, SCR_WIDTH / 2.0, SCR_HEIGHT / 2.0);
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPos(window, SCR_WIDTH / 2.0, SCR_HEIGHT / 2.0);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
 	// glad: Cargar todos los apuntadores
