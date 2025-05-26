@@ -524,7 +524,7 @@ bool Update() {
 
 		if (fixedCam) {
 			if (first) { lastPos = camera.Position; first = false; };
-			camera.Position = camera.Position = glm::vec3(-3.0f, 4.5f, 0.0f);
+			camera.Position = glm::vec3(3.0f, 4.5f, 0.0f);
 		}
 		else {
 			if (!first) { camera.Position = lastPos; first = true; }
