@@ -3,7 +3,7 @@
 
 
 ChessGame::ChessGame() : pick_place(true) {
-    // Inicialización de las variables miembro en el constructor
+    // Inicializaciï¿½n de las variables miembro en el constructor
     reyBlancoPos = glm::vec3(-0.3f, 0.2f, -2.1f);
     torre1BlancoPos = glm::vec3(2.1f, 0.2f, -2.1f);
     alfil1BlancoPos = glm::vec3(0.9f, 0.2f, -2.1f);
@@ -43,7 +43,6 @@ ChessGame::ChessGame() : pick_place(true) {
         glm::vec3(-1.5f, 0.2f, 1.5f),
         glm::vec3(-2.1f, 0.2f, 1.5f)
     };
-    inspectPosition = glm::vec3(-2.5f, 1.6f, 0.0f);
     inspectPosition = glm::vec3(-2.5f, 1.6f, 0.0f);
     inspectCameraPosition = glm::vec3(0.0f, 2.0f, 0.0f);
     inspectCameraFront = glm::normalize(glm::vec3(-1.5f, 0.0f, 0.0f));
@@ -120,7 +119,7 @@ void ChessGame::InitPieces() {
 }
 
 void ChessGame::HandleMouseClick(const glm::vec3& posMouse) {
-    if (posMouse.x == 9999.0f) return; // Posición fuera del tablero
+    if (posMouse.x == 9999.0f) return; // Posiciï¿½n fuera del tablero
 
     auto cell = board.getCellFromPosition(posMouse.x, posMouse.z);
 
@@ -175,12 +174,12 @@ bool ChessGame::HandleMiddleClick(const glm::vec3& posMouse, Camera& camera) {
     if (posMouse.x == 9999.0f) return false;
 
     if (inspectMode) {
-        // Salir del modo inspección
+        // Salir del modo inspecciï¿½n
         if (selected) {
             *selected->position = originalPosition;
             selected = nullptr;
         }
-        // Restaurar cámara
+        // Restaurar cï¿½mara
         camera.Position = originalCameraPosition;
         camera.Front = originalCameraFront;
         camera.Right = glm::normalize(glm::cross(camera.Front, camera.WorldUp));
@@ -190,22 +189,22 @@ bool ChessGame::HandleMiddleClick(const glm::vec3& posMouse, Camera& camera) {
         return true;
     }
     else {
-        // Entrar en modo inspección
+        // Entrar en modo inspecciï¿½n
         auto cell = board.getCellFromPosition(posMouse.x, posMouse.z);
         if (board.haveCharacter(cell.first, cell.second)) {
             selected = board.cells[cell.first][cell.second].character;
             originalPosition = *selected->position;
 
-            // Mover pieza a posición de inspección
+            // Mover pieza a posiciï¿½n de inspecciï¿½n
             selected->position->x = inspectPosition.x;
             selected->position->y = inspectPosition.y;
             selected->position->z = inspectPosition.z;
 
-            // Guardar posición original de la cámara
+            // Guardar posiciï¿½n original de la cï¿½mara
             originalCameraPosition = camera.Position;
             originalCameraFront = camera.Front;
 
-            // Mover cámara a posición de inspección
+            // Mover cï¿½mara a posiciï¿½n de inspecciï¿½n
             camera.Position = inspectCameraPosition;
             camera.Front = inspectCameraFront;
             camera.Right = glm::normalize(glm::cross(camera.Front, camera.WorldUp));
@@ -250,7 +249,7 @@ RenderChess(mLightsShader, model);
 *****************************************************************************************************************
 
 
-//*****************************************Definición de la función para renderizar piezas*****************************************
+//*****************************************Definiciï¿½n de la funciï¿½n para renderizar piezas*****************************************
 void RenderChess(Shader* shader, glm::mat4 model) {
     model = glm::mat4(1.0f);
     shader->setMat4("model", model);
@@ -277,7 +276,7 @@ void RenderChess(Shader* shader, glm::mat4 model) {
 
 
 //*****************************************************************************************************************************
-//Función para convertir coordenadas del mouse a coordenadas del mundo relacionadas a las casillas del tablero (plano Y=0.2)
+//Funciï¿½n para convertir coordenadas del mouse a coordenadas del mundo relacionadas a las casillas del tablero (plano Y=0.2)
 glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat4 view, float planeY = 0.2f) {
     // Convertir coordenadas del mouse a NDC
     double x = (2.0f * xpos) / SCR_WIDTH - 1.0f;
@@ -296,14 +295,14 @@ glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat
     glm::vec4 rayWorld = invView * rayEye;
     glm::vec3 rayDir = glm::normalize(glm::vec3(rayWorld));
 
-    // Calcular intersección con el plano Y = planeY
+    // Calcular intersecciï¿½n con el plano Y = planeY
     float t = (planeY - camera.Position[1]) / rayDir.y;
     glm::vec3 worldPos = camera.Position + t * rayDir;
 
     float cellSize = 0.6f; // Distancia entre casillas
     float boardOriginX = -2.1f; // Origen del tablero en X
     float boardOriginZ = -2.1f; // Origen del tablero en Z
-    int boardSize = 8;          // Tamaño 8x8 casillas
+    int boardSize = 8;          // Tamaï¿½o 8x8 casillas
 
     // Calcular casilla
     float relativeX = (worldPos.x - boardOriginX) / cellSize;
@@ -312,13 +311,13 @@ glm::vec3 ScreenToWorld(double xpos, double ypos, glm::mat4 projection, glm::mat
     int cellX = static_cast<int>(round(relativeX));
     int cellZ = static_cast<int>(round(relativeZ));
 
-    // Verificar si está dentro del tablero
+    // Verificar si estï¿½ dentro del tablero
     if (cellX < 0 || cellX >= boardSize || cellZ < 0 || cellZ >= boardSize) {
         // Fuera del tablero
         return glm::vec3(9999.0f);
     }
 
-    // Calcular posición centrada
+    // Calcular posiciï¿½n centrada
     float snappedX = boardOriginX + cellX * cellSize;
     float snappedZ = boardOriginZ + cellZ * cellSize;
 
