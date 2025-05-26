@@ -56,7 +56,7 @@ bool teleportCamera(float xMax, float xMin, float zMax, float zMin, glm::vec3 ne
 bool reachBox(float xMax, float xMin, float zMax, float zMin);
 
 void cambioSonido(ISound*& currentSong, const char* filePath, bool loop);
-void siguiente_narracion(bool reinicio);
+void siguiente_narracion();
 void trigger_audio();
 
 void cambio_escena();
@@ -122,6 +122,7 @@ Model* aguaembarcacion;
 Model* aguapueblo_2;
 
 Model* CambioEscena;
+Model* ObjetivoHalo;
 
 // Modelos animados
 AnimatedModel* character01;
@@ -180,7 +181,11 @@ string narraciones_path[6][5];
 string sfx_path[6];
 string background_path[6];
 // Trigger narracion
-glm::vec2 tr_A1_M1(5.0f, 5.0f);
+glm::vec2 tr_A1_M1(15.0f, 14.0f);
+glm::vec2 tr_A1_M2(-4.0f, -1.0f);
+glm::vec2 tr_A2_M1(-4.0f, -1.0f);
+glm::vec2 tr_A3_M1(0.0f, -34.0f);
+glm::vec3 tarPos;
 
 // Trigger sfx
 // selección de cámara
@@ -335,6 +340,7 @@ bool Start() {
 	// Dibujar en malla de alambre
 	// glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 	CambioEscena = new Model("models/General/CambioEscena.fbx");
+	ObjetivoHalo = new Model("models/General/Objetivo_Halo.fbx");
 
 	// Cubemap
 	vector<std::string> faces
@@ -386,7 +392,10 @@ bool Start() {
 	narraciones_path[0][0] = "sound/narracion/SalaInicial_Intro.mp3";
 	narraciones_path[1][0] = "sound/narracion/Es1_A1.mp3";
 	narraciones_path[1][1] = "sound/narracion/Es1_A2.mp3";
+	narraciones_path[1][2] = "sound/narracion/Es1_A3.mp3";
 	narraciones_path[2][0] = "sound/narracion/Es2_A1.mp3";
+	narraciones_path[3][0] = "sound/narracion/Es3_A1.mp3";
+	narraciones_path[3][1] = "sound/narracion/Es3_A2.mp3";
 
 	sfx_path[0] = "sound/sfx/Forge.wav";
 
@@ -396,6 +405,10 @@ bool Start() {
 	background_path[3] = "sound/background/ambientNature.mp3";
 	background_path[4] = "sound/background/ambientNature.mp3";
 	background_path[5] = "sound/background/ambientNature.mp3";
+
+	cambioSonido(narracion, narraciones_path[0][0].c_str(), false);
+
+	salaAntFrame = 0;
 
 	return true;
 }
@@ -484,7 +497,7 @@ bool Update() {
 		}
 
 		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f);
+			camera.Position = glm::vec3(4.0f, 2.0f, 0.0f);
 			lastPos = camera.Position;
 		}
 		if (chessGame.inspectMode) {
@@ -566,7 +579,7 @@ bool Update() {
 	{
 
 		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+			camera.Position = glm::vec3(-3.0f, 2.0f, -7.0f); //Poner aqui la posicion fija deseada
 			lastPos = camera.Position;
 			if (!sala2Loaded) {
 				Yucatas = new Model("models/mongol/Yucatas.fbx");
@@ -737,7 +750,7 @@ bool Update() {
 	else if (3 == salaActual)
 	{
 		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+			camera.Position = glm::vec3(6.0f, 2.0f, 6.0f); //Poner aqui la posicion fija deseada
 			lastPos = camera.Position;
 			if (!sala3Loaded) {
 				character02 = new AnimatedModel("models/mongol/jinete_espada.fbx");
@@ -1139,7 +1152,7 @@ bool Update() {
 	else if (4 == salaActual)
 	{
 		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(0.0f, 3.0f, 0.0f); //Poner aqui la posicion fija deseada
+			camera.Position = glm::vec3(0.0f, 3.0f, 45.0f); //Poner aqui la posicion fija deseada
 			lastPos = camera.Position;
 			if (!sala4Loaded) {
 				templos = new Model("models/mongol/ESCENAS/AreaTemplos.fbx");
@@ -1598,6 +1611,50 @@ bool Update() {
 		}
 	}
 
+	// Puntos a seguir
+	// Transicion de escena
+	{
+		{
+			mLightsShader->use();
+
+			// Activamos para objetos transparentes
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			mLightsShader->setMat4("projection", projection);
+			mLightsShader->setMat4("view", view);
+
+			// Aplicamos transformaciones del modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(tarPos.x, tarPos.y, tarPos.z)); // ¡Nuevo desplazamiento!
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+			mLightsShader->setMat4("model", model);
+
+			// Configuramos propiedades de fuentes de luz
+			mLightsShader->setInt("numLights", (int)gLights.size());
+			for (size_t i = 0; i < gLights.size(); ++i) {
+				SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+				SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+				SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+				SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+				SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+				SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+			}
+
+			mLightsShader->setVec3("eye", camera.Position);
+
+			// Aplicamos propiedades materiales
+			mLightsShader->setVec4("MaterialAmbientColor", material0.ambient);
+			mLightsShader->setVec4("MaterialDiffuseColor", material0.diffuse);
+			mLightsShader->setVec4("MaterialSpecularColor", material0.specular);
+			mLightsShader->setFloat("transparency", 0.6f);
+
+			ObjetivoHalo->Draw(*mLightsShader);
+			model = glm::mat4(1.0f);
+		}
+	}
+
 
 	// glfw: swap buffers 
 	glfwSwapBuffers(window);
@@ -1631,7 +1688,7 @@ void processInput(GLFWwindow* window)
 	{
 		if (momento == 0)
 		{
-			siguiente_narracion(true);
+			siguiente_narracion();
 		}
 	}
 
@@ -1741,6 +1798,11 @@ void cambio_escena()
 		else
 		{
 			salaActual = siguienteSala;
+			/*
+			if (backgroundMusic) backgroundMusic->drop();
+			if (sfx) sfx->drop();
+			if (narracion) narracion->drop();
+			*/
 			cambioSonido(backgroundMusic, background_path[salaActual - 1].c_str(), true);
 			momento = 0;
 			cambiandoEscena = false;
@@ -1766,23 +1828,11 @@ void cambioSonido(ISound*& currentSong, const char* filePath, bool loop = false)
 }
 
 
-void siguiente_narracion(bool reinicio = false)
+void siguiente_narracion()
 {
 	std::cout << "Reproduciendo audio Area: " << salaActual - 1 << "  -   Momento: " << momento << std::endl;
 	cambioSonido(narracion, narraciones_path[salaActual - 1][momento].c_str());
 	momento++;
-	/*
-	if (true)
-	{
-		cambioSonido(narracion, narraciones_path[salaActual-1][0].c_str());
-		momento++;
-	}
-	else
-	{
-		cambioSonido(narracion, narraciones_path[salaActual-1][momento].c_str());
-		momento++;
-	}
-	*/
 }
 
 void trigger_audio()
@@ -1791,30 +1841,59 @@ void trigger_audio()
 	{
 		float tar_pos_x = 100;
 		float tar_pos_y = 100;
-		int r = 1;
-		if (salaActual == 2)
+		float tar_pos_y_real = 0;
+		int r = 3;
+
+		switch (salaActual)
 		{
 			//std::cout << "Dist = " << sqrt((pow(camera.Position.x - tr_A1_M1.x, 2)) + (camera.Position.z - tr_A1_M1.y, 2)) << "----" << "(" << camera.Position.x << "," << camera.Position.z << ")" << std::endl;
 			// Parametros x, y, r
+		case 2:
 			switch (momento)
 			{
 			case 1:
 				tar_pos_x = tr_A1_M1.x;
 				tar_pos_y = tr_A1_M1.y;
-				r = 3;
+				break;
+			case 2:
+				tar_pos_x = tr_A1_M2.x;
+				tar_pos_y = tr_A1_M2.y;
 				break;
 			default:
 				break;
 			}
-
-			float d = sqrt((pow(camera.Position.x - tar_pos_x, 2)) + (camera.Position.z - tar_pos_y, 2));
-
-			if (d <= r)
+				//Jinetes
+		case 3:
+				if (momento == 1)
+				{
+					tar_pos_x = tr_A2_M1.x;
+					tar_pos_y = tr_A2_M1.y;
+				}
+				break;
+				//Templo
+		case 4:
+			if (momento == 1)
 			{
-				siguiente_narracion();
+				tar_pos_x = tr_A3_M1.x;
+				tar_pos_y = tr_A3_M1.y;
+				tar_pos_y_real = 3.0f;
 			}
 		}
+		float d = sqrt(((pow(camera.Position.x - tar_pos_x, 2)) + pow(camera.Position.z - tar_pos_y, 2)));
+		std::cout << "Momento: " << momento << " - Dest (" << tar_pos_x << "," << tar_pos_y << " --- Dist = " << d << "----" << "(" << camera.Position.x << "," << camera.Position.z << ")" << std::endl;
+		if (d <= r)
+		{
+			siguiente_narracion();
+		}
+		tarPos.x = tar_pos_x;
+		tarPos.y = tar_pos_y_real;
+		tarPos.z = tar_pos_y;
 
+		if (d <= r)
+		{
+			siguiente_narracion();
+		}
+	
 	}
 }
 
