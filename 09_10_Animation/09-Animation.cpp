@@ -84,6 +84,12 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float elapsedTime = 0.0f;
 
+// Partículas
+Particles particlesSystem(30); // creamos 200 partículas
+
+// Carga la información del modelo
+Model* particleModel;
+
 glm::vec3 position(0.0f, 0.0f, 0.0f);
 glm::vec3 forwardView(0.0f, 0.0f, 1.0f);
 float     trdpersonOffset = 1.5f;
@@ -103,6 +109,7 @@ Shader* fresnelShader;
 
 Shader* cubemapShader;
 Shader* dynamicShader;
+Shader* particlesShader;
 
 // Carga la información del modelo
 Model* terrenos;
@@ -327,8 +334,8 @@ bool Start() {
 	glfwSetMouseButtonCallback(window, MouseButtonCallback);
 
 	// Ocultar el cursor mientras se rota la escena
-	glfwSetCursorPos(window, SCR_WIDTH / 2.0, SCR_HEIGHT / 2.0);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetCursorPos(window, SCR_WIDTH / 2.0, SCR_HEIGHT / 2.0);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
 	// glad: Cargar todos los apuntadores
@@ -349,6 +356,7 @@ bool Start() {
 	dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
 	fresnelShader = new Shader("shaders/11_Fresnel.vs", "shaders/11_Fresnel.fs");
 	cursorShader = new Shader("shaders/01_cursor.vs", "shaders/01_cursor.fs");
+	particlesShader = new Shader("shaders/13_particles.vs", "shaders/13_particles.fs");
 
 	// Máximo número de huesos: 100
 	dynamicShader->setBonesIDs(MAX_RIGGING_BONES);
@@ -465,6 +473,13 @@ bool Update() {
 	float currentFrame = (float)glfwGetTime();
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
+
+	elapsedTime += deltaTime;
+	if (elapsedTime > 1.0f / 30.0f) {
+		elapsedTime = 0.0f;
+
+		particlesSystem.UpdatePhysics(deltaTime);
+	}
 
 	// Procesa la entrada del teclado o mouse
 	processInput(window);
@@ -1356,6 +1371,7 @@ bool Update() {
 				aguapueblo = new Model("models/vikingos/aguapueblo.fbx");
 				cerdoanimado = new AnimatedModel("models/animales/cerdoanimado.fbx");
 				galloanimado = new AnimatedModel("models/animales/galloanimado.fbx");
+				particleModel = new Model("models/snow/snow.fbx");
 				sala5Loaded = true;
 			}
 		}
@@ -1499,6 +1515,45 @@ bool Update() {
 			glEnable(GL_CULL_FACE);
 		}
 
+
+		glUseProgram(0);
+
+		// Animación de partículas
+		{
+			// Activación del shader de las partículas
+			particlesShader->use();
+			particlesShader->setMat4("projection", projection);
+			particlesShader->setMat4("view", view);
+
+			// Activamos para objetos transparentes
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glm::mat4 model;
+
+			// Obtenemos la posición de la cámara (jugador)
+			glm::vec3 cameraPos = glm::vec3(glm::inverse(view)[3]);
+
+			for (int psc = 0; psc < particlesSystem.particles.size(); psc++) {
+				Particle p_i = particlesSystem.particles.at(psc);
+
+				// 1. Calculamos la dirección hacia la cámara
+				glm::vec3 direction = glm::normalize(cameraPos - p_i.position);
+
+				// 2. Calculamos la rotación necesaria (ángulo en el eje Y)
+				float angle = atan2(direction.x, direction.z);
+
+				// 3. Aplicamos transformaciones del modelo
+				model = glm::mat4(1.0f);
+				model = glm::translate(model, p_i.position);
+				model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación para mirar a la cámara
+				model = glm::scale(model, glm::vec3(0.1f)); // Escala
+
+				particlesShader->setMat4("model", model);
+
+				// Dibujamos el modelo
+				particleModel->Draw(*particlesShader);
+			}
+		}
 
 		glUseProgram(0);
 		salaAntFrame = 5;
@@ -1996,7 +2051,7 @@ void trigger_audio()
 			break;
 		}
 		float d = sqrt(((pow(camera.Position.x - tar_pos_x, 2)) + pow(camera.Position.z - tar_pos_y, 2)));
-		std::cout << "Momento: " << momento << " - Dest (" << tar_pos_x << "," << tar_pos_y << " --- Dist = " << d << "----" << "(" << camera.Position.x << "," << camera.Position.z << ")" << std::endl;
+		//std::cout << "Momento: " << momento << " - Dest (" << tar_pos_x << "," << tar_pos_y << " --- Dist = " << d << "----" << "(" << camera.Position.x << "," << camera.Position.z << ")" << std::endl;
 		if (d <= r)
 		{
 			if (cambiarEscena)
