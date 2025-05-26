@@ -181,10 +181,25 @@ string narraciones_path[6][5];
 string sfx_path[6];
 string background_path[6];
 // Trigger narracion
+glm::vec2 tr_A0_M1(-6.0f, 0.0f);
+glm::vec2 tr_A1_M0(0.0f, -5.0f);
 glm::vec2 tr_A1_M1(15.0f, 14.0f);
 glm::vec2 tr_A1_M2(-4.0f, -1.0f);
-glm::vec2 tr_A2_M1(-4.0f, -1.0f);
+glm::vec2 tr_A1_M3(0.0f, 6.0f);
+glm::vec2 tr_A2_M0(8.0f, 1.0f);
+glm::vec2 tr_A2_M1(6.0f, 6.0f);
+glm::vec2 tr_A2_M2(0.0f, 6.0f);
+glm::vec2 tr_A3_M0(0.0f, 42.0f);
 glm::vec2 tr_A3_M1(0.0f, -34.0f);
+glm::vec2 tr_A3_M2(0.0f, 14.0f);
+glm::vec2 tr_A4_M0(-7.0f, -35.0f);
+glm::vec2 tr_A4_M1(21.0f, -31.0f);
+glm::vec2 tr_A4_M2(42.0f, -41.0f);
+glm::vec2 tr_A4_M3(36.0f, 7.0f);
+glm::vec2 tr_A4_M4(-10.0f, 10.0f);
+glm::vec2 tr_A4_M5(-20.0f, -5.0f);
+glm::vec2 tr_A4_M6(-31.0f, -7.0f);
+glm::vec2 tr_A5_M0(-2.0f, -8.0f);
 glm::vec3 tarPos;
 
 // Trigger sfx
@@ -750,7 +765,7 @@ bool Update() {
 	else if (3 == salaActual)
 	{
 		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(6.0f, 2.0f, 6.0f); //Poner aqui la posicion fija deseada
+			camera.Position = glm::vec3(8.0f, 2.0f, 1.0f); //Poner aqui la posicion fija deseada
 			lastPos = camera.Position;
 			if (!sala3Loaded) {
 				character02 = new AnimatedModel("models/mongol/jinete_espada.fbx");
@@ -1152,7 +1167,7 @@ bool Update() {
 	else if (4 == salaActual)
 	{
 		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(0.0f, 3.0f, 45.0f); //Poner aqui la posicion fija deseada
+			camera.Position = glm::vec3(0.0f, 3.0f, 49.0f); //Poner aqui la posicion fija deseada
 			lastPos = camera.Position;
 			if (!sala4Loaded) {
 				templos = new Model("models/mongol/ESCENAS/AreaTemplos.fbx");
@@ -1333,7 +1348,7 @@ bool Update() {
 	{
 
 		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+			camera.Position = glm::vec3(-8.0f, 2.0f, -25.0f); //Poner aqui la posicion fija deseada
 			if (!sala5Loaded) {
 				AldeaVikinga = new Model("models/vikingos/PuebloVik.fbx");
 				aguapueblo = new Model("models/vikingos/aguapueblo.fbx");
@@ -1484,7 +1499,7 @@ bool Update() {
 	{
 
 		if (salaActual != salaAntFrame) {
-			camera.Position = glm::vec3(3.0f, 2.0f, -3.0f); //Poner aqui la posicion fija deseada
+			camera.Position = glm::vec3(4.0f, 2.0f, -8.0f); //Poner aqui la posicion fija deseada
 			if (!sala6Loaded) {
 				EmbarcacionVik = new Model("models/vikingos/embarcacion.fbx");
 				aguaembarcacion = new Model("models/vikingos/agua_embarcacion.fbx");
@@ -1843,14 +1858,26 @@ void trigger_audio()
 		float tar_pos_y = 100;
 		float tar_pos_y_real = 0;
 		int r = 3;
+		bool cambiarEscena = false;
 
 		switch (salaActual)
 		{
 			//std::cout << "Dist = " << sqrt((pow(camera.Position.x - tr_A1_M1.x, 2)) + (camera.Position.z - tr_A1_M1.y, 2)) << "----" << "(" << camera.Position.x << "," << camera.Position.z << ")" << std::endl;
 			// Parametros x, y, r
+		// Museo Inicial
+		case 1:
+			tar_pos_x = tr_A0_M1.x;
+			tar_pos_y = tr_A0_M1.y;
+			cambiarEscena = true;
+			break;
+		// Yucatas
 		case 2:
 			switch (momento)
 			{
+			case 0:
+				tar_pos_x = tr_A1_M0.x;
+				tar_pos_y = tr_A1_M0.y;
+				break;
 			case 1:
 				tar_pos_x = tr_A1_M1.x;
 				tar_pos_y = tr_A1_M1.y;
@@ -1859,40 +1886,114 @@ void trigger_audio()
 				tar_pos_x = tr_A1_M2.x;
 				tar_pos_y = tr_A1_M2.y;
 				break;
+			case 3:
+				tar_pos_x = tr_A1_M3.x;
+				tar_pos_y = tr_A1_M3.y;
+				cambiarEscena = true;
+				break;
 			default:
 				break;
 			}
-				//Jinetes
+		//Jinetes
 		case 3:
-				if (momento == 1)
-				{
-					tar_pos_x = tr_A2_M1.x;
-					tar_pos_y = tr_A2_M1.y;
-				}
-				break;
-				//Templo
+			if (momento == 0)
+			{
+					tar_pos_x = tr_A2_M0.x;
+					tar_pos_y = tr_A2_M0.y;
+			}
+			else if (momento == 1)
+			{
+				tar_pos_x = tr_A2_M1.x;
+				tar_pos_y = tr_A2_M1.y;
+			}
+			else
+			{
+				tar_pos_x = tr_A2_M2.x;
+				tar_pos_y = tr_A2_M2.y;
+				cambiarEscena = true;
+			}
+			break;
+		//Templo
 		case 4:
-			if (momento == 1)
+			if (momento == 0)
+			{
+				tar_pos_x = tr_A3_M0.x;
+				tar_pos_y = tr_A3_M0.y;
+			}
+			else if (momento == 1)
 			{
 				tar_pos_x = tr_A3_M1.x;
 				tar_pos_y = tr_A3_M1.y;
 				tar_pos_y_real = 3.0f;
 			}
+			else
+			{
+				tar_pos_x = tr_A3_M2.x;
+				tar_pos_y = tr_A3_M2.y;
+				cambiarEscena = true;
+			}
+			break;
+		// Aldea vikinga
+		case 5:
+			switch (momento)
+			{
+			case 0:
+				tar_pos_x = tr_A4_M0.x;
+				tar_pos_y = tr_A4_M0.y;
+				break;
+			case 1:
+				tar_pos_x = tr_A4_M1.x;
+				tar_pos_y = tr_A4_M1.y;
+				break;
+			case 2:
+				tar_pos_x = tr_A4_M2.x;
+				tar_pos_y = tr_A4_M2.y;
+				break;
+			case 3:
+				tar_pos_x = tr_A4_M3.x;
+				tar_pos_y = tr_A4_M3.y;
+				break;
+			case 4:
+				tar_pos_x = tr_A4_M4.x;
+				tar_pos_y = tr_A4_M4.y;
+				break;
+			case 5:
+				tar_pos_x = tr_A4_M5.x;
+				tar_pos_y = tr_A4_M5.y;
+				break;
+			case 6:
+				tar_pos_x = tr_A4_M6.x;
+				tar_pos_y = tr_A4_M6.y;
+				cambiarEscena = true;
+				break;
+			default:
+				break;
+			}
+			break;
+		// Enmbarcación
+		case 6:
+			if (momento == 0)
+			{
+				tar_pos_x = tr_A5_M0.x;
+				tar_pos_y = tr_A5_M0.y;
+			}
+			break;
 		}
 		float d = sqrt(((pow(camera.Position.x - tar_pos_x, 2)) + pow(camera.Position.z - tar_pos_y, 2)));
 		std::cout << "Momento: " << momento << " - Dest (" << tar_pos_x << "," << tar_pos_y << " --- Dist = " << d << "----" << "(" << camera.Position.x << "," << camera.Position.z << ")" << std::endl;
 		if (d <= r)
 		{
+			if (cambiarEscena)
+			{
+				cambiandoEscena = true;
+				siguienteSala = salaActual + 1;
+				return;
+			}
 			siguiente_narracion();
 		}
 		tarPos.x = tar_pos_x;
 		tarPos.y = tar_pos_y_real;
 		tarPos.z = tar_pos_y;
-
-		if (d <= r)
-		{
-			siguiente_narracion();
-		}
 	
 	}
 }
